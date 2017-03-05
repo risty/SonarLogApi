@@ -6,7 +6,7 @@
 	public enum LinearDimensionUnit : byte
 	{
 		Meter,
-		
+
 		/// <summary>
 		/// US/UK foot value
 		/// </summary>
@@ -36,7 +36,7 @@
 		/// </summary>
 		/// <param name="value"><see cref="LinearDimension"/> value</param>
 		/// <param name="unit"><see cref="LinearDimension"/> unit</param>
-		public LinearDimension(double value, LinearDimensionUnit unit )
+		public LinearDimension(double value, LinearDimensionUnit unit)
 		{
 			Value = value;
 			Unit = unit;
@@ -49,8 +49,10 @@
 		/// <returns><see cref="LinearDimension"/> value in meters</returns>
 		public static double GetMeters(LinearDimension depth)
 		{
+			if (depth == null) throw new NullReferenceException(nameof(depth));
+
 			return depth.Unit == LinearDimensionUnit.Meter
-				? depth.Value 
+				? depth.Value
 				: depth.Value * _metersInOneFoot;
 		}
 
@@ -91,9 +93,11 @@
 		/// <returns><see cref="LinearDimension"/> object with value in meters</returns>
 		public static LinearDimension ToMeters(LinearDimension depth)
 		{
-			return depth.Unit == LinearDimensionUnit.Meter 
-				? depth 
-				: new LinearDimension(GetMeters(depth),LinearDimensionUnit.Meter);
+			if (depth == null) throw new NullReferenceException(nameof(depth));
+
+			return depth.Unit == LinearDimensionUnit.Meter
+				? depth
+				: new LinearDimension(GetMeters(depth), LinearDimensionUnit.Meter);
 		}
 
 		/// <summary>
@@ -115,19 +119,33 @@
 			return isSuccessParse;
 		}
 
+		public override bool Equals(object obj)
+		{
+			var item = obj as LinearDimension;
+
+			return item != null && Equals(item);
+		}
+
+		/// <summary>
+		/// Determines if a specified <see cref="SonarLogAPI.Primitives.LinearDimension" /> 
+		/// is equal to the current <see cref="SonarLogAPI.Primitives.LinearDimension" />.
+		/// </summary>
+		/// <param name="other">The object to compare the <see cref="SonarLogAPI.Primitives.LinearDimension" /> to.</param>
+		/// <returns>True, if the <see cref="SonarLogAPI.Primitives.LinearDimension" /> objects are equal; otherwise, false.</returns>
 		public bool Equals(LinearDimension other)
 		{
-			return other != null && GetMeters().Equals(other.GetMeters());
+			//Check whether the compared object is null. 
+			if (ReferenceEquals(other, null)) return false;
+
+			//Check whether the compared object references the same data. 
+			if (ReferenceEquals(this, other)) return true;
+
+			return GetMeters().Equals(other.GetMeters());
 		}
 
-		public static bool operator ==(LinearDimension left, LinearDimension right)
+		public override int GetHashCode()
 		{
-			return (object)left != null && (object)right != null && left.Equals(right);
-		}
-
-		public static bool operator !=(LinearDimension left, LinearDimension right)
-		{
-			return !(left == right);
+			return GetMeters().GetHashCode();
 		}
 
 		public override string ToString()
