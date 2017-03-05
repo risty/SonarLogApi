@@ -101,10 +101,10 @@
 
 		/// <summary>
 		/// Determines if a specified <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> 
-		/// is equal to the current <see cref="SonarLogAPI.Primitives.CoordinatePoint" />, based solely on latitude and longitude.
+		/// is equal to the current <see cref="SonarLogAPI.Primitives.CoordinatePoint" />.
 		/// </summary>
 		/// <param name="obj">The object to compare the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to.</param>
-		/// <returns>true, if the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects are equal; otherwise, false.</returns>
+		/// <returns>True, if the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects are equal; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			var item = obj as CoordinatePoint;
