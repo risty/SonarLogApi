@@ -695,7 +695,8 @@
 		private static void WriteSl2Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
 		{
 			//takes frame with channel type != ChannelType.ThreeD and sort it after
-			framesToWrite.Where(x => x.ChannelType != ChannelType.ThreeD).ToList().Sort();
+			framesToWrite = framesToWrite.Where(x => x.ChannelType != ChannelType.ThreeD).ToList();
+			framesToWrite.Sort();
 
 			int frameOffset = framesSetStartByteOffset;
 			int lastPrimaryChannelFrameOffset = 0;
@@ -766,7 +767,13 @@
 				writer.Write(new int());
 				writer.Write(new byte());
 				writer.Write((float)frame.Depth.GetFoots());
-				writer.Write((float)frame.KeelDepth.GetFoots());
+
+				if (frame.KeelDepth != null)
+					writer.Write((float)frame.KeelDepth.GetFoots());
+				else
+					writer.Write((float)0);
+
+
 				//write zeros in 28 bytes (from offset 72 to 100)
 				writer.Write(new long());
 				writer.Write(new long());
@@ -784,34 +791,37 @@
 				//
 				var twoFlagsBytes = new byte[2];
 				//sets bits in two bytes
-				foreach (var frameFlag in frame.Flags)
+				if (frame.Flags != null)
 				{
-					switch (frameFlag)
+					foreach (var frameFlag in frame.Flags)
 					{
-						case FrameFlags.TrackValid:
-							SetBitInByte(ref twoFlagsBytes[0], 0);
-							break;
-						case FrameFlags.WaterSpeedValid:
-							SetBitInByte(ref twoFlagsBytes[0], 1);
-							break;
-						case FrameFlags.PositionValid:
-							SetBitInByte(ref twoFlagsBytes[0], 3);
-							break;
-						case FrameFlags.WaterTempValid:
-							SetBitInByte(ref twoFlagsBytes[0], 5);
-							break;
-						case FrameFlags.SpeedValid:
-							SetBitInByte(ref twoFlagsBytes[0], 6);
-							break;
-						case FrameFlags.AltitudeValid:
-							SetBitInByte(ref twoFlagsBytes[1], 6);
-							break;
-						case FrameFlags.HeadingValid:
-							SetBitInByte(ref twoFlagsBytes[1], 7);
-							break;
-						default:
-							throw new ArgumentOutOfRangeException();
+						switch (frameFlag)
+						{
+							case FrameFlags.TrackValid:
+								SetBitInByte(ref twoFlagsBytes[0], 0);
+								break;
+							case FrameFlags.WaterSpeedValid:
+								SetBitInByte(ref twoFlagsBytes[0], 1);
+								break;
+							case FrameFlags.PositionValid:
+								SetBitInByte(ref twoFlagsBytes[0], 3);
+								break;
+							case FrameFlags.WaterTempValid:
+								SetBitInByte(ref twoFlagsBytes[0], 5);
+								break;
+							case FrameFlags.SpeedValid:
+								SetBitInByte(ref twoFlagsBytes[0], 6);
+								break;
+							case FrameFlags.AltitudeValid:
+								SetBitInByte(ref twoFlagsBytes[1], 6);
+								break;
+							case FrameFlags.HeadingValid:
+								SetBitInByte(ref twoFlagsBytes[1], 7);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
 
+						}
 					}
 				}
 
@@ -841,7 +851,7 @@
 			{
 				case FileVersion.SLG:
 					throw new NotImplementedException();
-					//break;
+				//break;
 				case FileVersion.SL2:
 					slType = typeof(Sl2FramePropertiesOffsets);
 					break;
