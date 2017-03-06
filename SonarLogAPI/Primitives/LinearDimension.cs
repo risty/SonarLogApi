@@ -148,6 +148,16 @@
 			return GetMeters().GetHashCode();
 		}
 
+		public static bool operator ==(LinearDimension left, LinearDimension right)
+		{
+			return ReferenceEquals(left, null) && ReferenceEquals(right, null) || !ReferenceEquals(left, null) && left.Equals(right);
+		}
+
+		public static bool operator !=(LinearDimension left, LinearDimension right)
+		{
+			return !(left == right);
+		}
+
 		public override string ToString()
 		{
 			return string.Format(CultureInfo.InvariantCulture, "{0:0.000 meters}", GetMeters());
