@@ -600,15 +600,18 @@
 
 			foreach (var frame in framesToWrite)
 			{
+				//calculate new frame size
+				var newFrameSize = (short)(frame.PacketSize + 168);
+
 				//write frameOffset
 				writer.Write(frameOffset);
 
 				//write zero in 4 bytes (offset 4)
 				writer.Write(new int());
-				writer.Write(frame.ThisFrameSize);
+				writer.Write(newFrameSize);
 				writer.Write(previousFrameSize);
 
-				previousFrameSize = frame.ThisFrameSize;
+				previousFrameSize = newFrameSize;
 
 				writer.Write((short)frame.ChannelType);
 				//write zero in 2 bytes (offset 14-16)
@@ -687,7 +690,7 @@
 				writer.Write(lastThreeDChannelFrameOffset);
 				writer.Write(frame.SoundedData);
 
-				frameOffset += frame.ThisFrameSize;
+				frameOffset += newFrameSize;
 			}
 
 		}
@@ -696,6 +699,8 @@
 		{
 			//takes frame with channel type != ChannelType.ThreeD and sort it after
 			framesToWrite = framesToWrite.Where(x => x.ChannelType != ChannelType.ThreeD).ToList();
+			
+			//sort before writing
 			framesToWrite.Sort();
 
 			int frameOffset = framesSetStartByteOffset;
@@ -712,6 +717,9 @@
 
 			foreach (var frame in framesToWrite)
 			{
+				//calculate new frame size
+				var newFrameSize = (short)(frame.PacketSize + 144);
+
 				//write frameOffset
 				writer.Write(frameOffset);
 
@@ -748,11 +756,12 @@
 				writer.Write(lastSidescanLeftChannelFrameOffset);
 				writer.Write(lastSidescanRightChannelFrameOffset);
 				writer.Write(lastSidescanCompositeChannelFrameOffset);
-				writer.Write(frame.ThisFrameSize);
+				//write frame size
+				writer.Write(newFrameSize);
 				writer.Write(previousFrameSize);
 
-				frameOffset += frame.ThisFrameSize;
-				previousFrameSize = frame.ThisFrameSize;
+				frameOffset += newFrameSize;
+				previousFrameSize = newFrameSize;
 
 				writer.Write((short)frame.ChannelType);
 				writer.Write(frame.PacketSize);
