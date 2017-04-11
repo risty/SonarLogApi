@@ -152,7 +152,7 @@
 	/// <summary>
 	/// Sonar log data frame
 	/// </summary>
-	public struct Frame : IDepthPointSource, ITemperaturePointSource, IComparable<Frame>
+	public class Frame : IDepthPointSource, ITemperaturePointSource, IComparable<Frame>
 	{
 		//Properties based on http://wiki.openstreetmap.org/wiki/SL2
 
