@@ -158,6 +158,26 @@
 			return !(left == right);
 		}
 
+		public static bool operator <(LinearDimension left, LinearDimension right)
+		{
+			return left.GetMeters() < right.GetMeters();
+		}
+
+		public static bool operator >(LinearDimension left, LinearDimension right)
+		{
+			return left.GetMeters() > right.GetMeters();
+		}
+
+		public static LinearDimension operator +(LinearDimension left, LinearDimension right)
+		{
+			return new LinearDimension(left.GetMeters() + right.GetMeters(), LinearDimensionUnit.Meter);
+		}
+
+		public static LinearDimension operator -(LinearDimension left, LinearDimension right)
+		{
+			return new LinearDimension(left.GetMeters() - right.GetMeters(), LinearDimensionUnit.Meter);
+		}
+
 		public override string ToString()
 		{
 			return string.Format(CultureInfo.InvariantCulture, "{0:0.000 meters}", GetMeters());

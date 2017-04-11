@@ -149,7 +149,7 @@ namespace NUnit.Tests
 			var point2 = new CoordinatePoint(43.81234123, -164.243457567);
 			var point3 = new CoordinatePoint(-60.813454769, 95.4567427812);
 
-			Assert.AreEqual(point1,point2);
+			Assert.AreEqual(point1, point2);
 			Assert.IsTrue(point1 == point2);
 			Assert.IsFalse(point1 == point3);
 			Assert.IsTrue(point1 != point3);
@@ -158,13 +158,13 @@ namespace NUnit.Tests
 		[Test(TestOf = typeof(CoordinatePoint))]
 		public void DistanceTest()
 		{
-			var one = new CoordinatePoint(new Latitude(60,12.698), new Longitude(32,25.259));
+			var one = new CoordinatePoint(new Latitude(60, 12.698), new Longitude(32, 25.259));
 
 			var two = new CoordinatePoint(new Latitude(60, 12.730), new Longitude(32, 25.346));
 
 			// distance takes from Lowrance Elite-5 HDI
 			Assert.AreEqual(99, CoordinatePoint.DistanceBetweenPoints(one, two).GetMeters(), 1);
-			
+
 		}
 
 	}
@@ -180,6 +180,19 @@ namespace NUnit.Tests
 
 			Assert.AreEqual(depth1, depth2);
 			Assert.IsTrue(depth1 == depth2);
+		}
+
+		[Test(TestOf = typeof(LinearDimension))]
+		public void LinearDimensionOperationsTest()
+		{
+			var depth1 = new LinearDimension(43.81, LinearDimensionUnit.Foot);
+			var depth2 = new LinearDimension(12.34, LinearDimensionUnit.Meter);
+			var depth3 = new LinearDimension(depth1.GetMeters() + depth2.GetMeters(), LinearDimensionUnit.Meter);
+
+			Assert.IsTrue(depth1 > depth2);
+			Assert.IsTrue(depth2 < depth1);
+			Assert.IsTrue(depth3 == depth1 + depth2);
+
 		}
 	}
 
