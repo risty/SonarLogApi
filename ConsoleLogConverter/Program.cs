@@ -4,12 +4,14 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using System.IO.MemoryMappedFiles;
 	using System.Linq;
 	using System.Text;
 
 	using CommandLine;
 	using CommandLine.Text;
 
+	using SonarLogAPI;
 	using SonarLogAPI.CVS;
 	using SonarLogAPI.Lowrance;
 	using SonarLogAPI.Primitives;
@@ -25,6 +27,10 @@
 			[Option('s', "search", Required = false, DefaultValue = -1,
 				 HelpText = "Enables research mode. Research value at specified byte offset inside frame will be printed to console.")]
 			public int SearchOffset { get; set; }
+
+			[Option('d', "output", Required = false,
+				HelpText = "Input filename for depth adjust")]
+			public string DepthAdjustFile { get; set; }
 
 			[OptionList('o', "output", Separator = ':',
 				 HelpText = "Enables convertion mode. Output file version. sl2:sl3:cvs")]
@@ -60,7 +66,8 @@
 										"An finally it takes four bytes at 30 offset from each frame start and represent them as differet types of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).\n\n");
 				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:cvs\"\n");
 				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with \"sl2\" and \"cvs\" format.\n\n");
-
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o cvs\"\n");
+				text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"cvs\" format.\n\n");
 				return text;
 			}
 
@@ -91,9 +98,42 @@
 			Console.WriteLine(lastStr);
 		}
 
+		private static LowranceLogData ReadFile(string filename, bool verbose)
+		{
+			var stopWatch = new Stopwatch();
+			if (verbose)
+				Console.WriteLine("Reads filename: {0}\n", filename);
+
+			LowranceLogData data;
+			try
+			{
+				using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+				{
+					stopWatch.Start();
+					data = LowranceLogData.ReadFromStream(stream);
+					stopWatch.Stop();
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				Console.WriteLine("Please press any key to exit...");
+				Console.ReadKey(true);
+				return null;
+			}
+
+			if (verbose)
+			{
+				Console.WriteLine("Read time: " + stopWatch.Elapsed + "\n");
+				stopWatch.Reset();
+				LowranceLogDataInfo(data);
+			}
+
+			return data;
+		}
+
 		static void Main(string[] args)
 		{
-
 			var options = new Options();
 			if (Parser.Default.ParseArguments(args, options))
 			{
@@ -107,36 +147,44 @@
 					channels.AddRange(options.Channels.Select(channel => (ChannelType)Enum.Parse(typeof(ChannelType), channel)));
 				}
 
-				if (options.Verbose)
-					Console.WriteLine("Input filename: {0}\n", options.InputFile);
-
 				var stopWatch = new Stopwatch();
-				LowranceLogData data;
 
-				//Read File
-				try
+				//Read Files
+				var data = ReadFile(options.InputFile, options.Verbose);
+
+				if (!string.IsNullOrWhiteSpace(options.DepthAdjustFile))
 				{
-					using (var stream = new FileStream(options.InputFile, FileMode.Open, FileAccess.Read))
+					var adjust = ReadFile(options.DepthAdjustFile, options.Verbose);
+					var da = new DepthAdjuster(data.Frames, adjust.Frames);
+
+					if (options.Verbose)
 					{
-						stopWatch.Start();
-						data = LowranceLogData.ReadFromStream(stream);
-						stopWatch.Stop();
-					}
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine(ex);
-					Console.WriteLine("Please press any key to exit...");
-					Console.ReadKey(true);
-					return;
-				}
+						da.NearestPointsFound += (o, e) =>
+						{
+							Console.WriteLine("Nearest points are:\nBase - {0} with {1} depth.\nAdjust - {2} with {3}.",
+											  e.FirstPoint.Point, e.FirstPoint.Depth, e.SecondPoint.Point, e.SecondPoint.Depth);
+							Console.WriteLine("Distance = {0}", e.Distance);
+						};
 
-				if (options.Verbose)
-				{
-					Console.WriteLine("Read time: " + stopWatch.Elapsed + "\n");
+						Console.WriteLine("Looking for the nearest points.....");
+					}
+
+					stopWatch.Start();
+					var points = da.AdjustDepth();
+
+					if (options.Verbose)
+					{
+						Console.WriteLine("Adjust time: " + stopWatch.Elapsed + "\n");
+					}
 					stopWatch.Reset();
-					LowranceLogDataInfo(data);
-				}
+
+					//add points to original sequence
+					foreach (var point in points)
+					{
+						data.Frames.Add((Frame)point);
+					}
+
+				}	
 
 				//if research mode, then opens file again
 				if (options.SearchOffset >= 0)
