@@ -18,4 +18,9 @@ Conversion mode.
 Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index 
 from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with "sl2" and "cvs" format.
 
+Depth Ajust.
+There are situations where the depth in one log is necessary to ajust to the depth in another log.
+"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o cvs"
+Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with "cvs".
+
 Also you can combine modes.
