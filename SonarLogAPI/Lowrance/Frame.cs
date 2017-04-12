@@ -363,7 +363,7 @@
 		/// <param name="reader"><see cref="BinaryReader"/></param>
 		/// <param name="readPosition">Offset of first frame (in bytes) in <see cref="BinaryReader"/>'s stream </param>
 		/// <param name="version"><see cref="FileVersion"/></param>
-		/// <returns>Dictionary. Keys - frames offsets. Value - Tuple with debug data.</returns>
+		/// <returns>Sequence of frames offsets</returns>
 		public static IEnumerable<int> GetFrameMap(BinaryReader reader, int readPosition, FileVersion version)//, Func<Frame, bool> validationFunc)
 		{
 			var slType = GetOffsetsTypeForFileVersion(version);
