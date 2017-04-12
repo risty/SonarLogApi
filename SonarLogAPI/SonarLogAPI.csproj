@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CVS\CVSLogData.cs" />
+    <Compile Include="DepthAdjuster.cs" />
     <Compile Include="Primitives\Coordinate.cs" />
     <Compile Include="Primitives\CoordinatePoint.cs" />
     <Compile Include="Primitives\ICoordinatePointSource.cs" />
