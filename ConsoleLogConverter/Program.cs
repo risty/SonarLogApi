@@ -28,7 +28,7 @@
 				 HelpText = "Enables research mode. Research value at specified byte offset inside frame will be printed to console.")]
 			public int SearchOffset { get; set; }
 
-			[Option('d', "output", Required = false,
+			[Option('d', "dpajust", Required = false,
 				HelpText = "Input filename for depth adjust")]
 			public string DepthAdjustFile { get; set; }
 
