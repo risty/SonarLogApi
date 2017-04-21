@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
-	using System.IO.MemoryMappedFiles;
 	using System.Linq;
 	using System.Text;
 
@@ -12,7 +11,7 @@
 	using CommandLine.Text;
 
 	using SonarLogAPI;
-	using SonarLogAPI.CVS;
+	using SonarLogAPI.CSV;
 	using SonarLogAPI.Lowrance;
 	using SonarLogAPI.Primitives;
 
@@ -33,7 +32,7 @@
 			public string DepthAdjustFile { get; set; }
 
 			[OptionList('o', "output", Separator = ':',
-				 HelpText = "Enables convertion mode. Output file version. sl2:sl3:cvs")]
+				 HelpText = "Enables convertion mode. Output file version. sl2:sl3:csv")]
 			public IList<string> OutputFileVersion { get; set; }
 
 			[OptionList('c', "channel", Separator = ':', Required = false,
@@ -64,10 +63,10 @@
 				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl3 -s 30 -t 10 -c 0:2\"\n");
 				text.AddPostOptionsLine("Command takes all frames from input.sl3. At the next step it takes frames from channels 0 and 2 with frame index from 0 to 10. " +
 										"An finally it takes four bytes at 30 offset from each frame start and represent them as differet types of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).\n\n");
-				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:cvs\"\n");
-				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with \"sl2\" and \"cvs\" format.\n\n");
-				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o cvs\"\n");
-				text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"cvs\" format.\n\n");
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:csv\"\n");
+				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with \"sl2\" and \"csv\" format.\n\n");
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o csv\"\n");
+				text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"csv\" format.\n\n");
 				return text;
 			}
 
@@ -331,20 +330,20 @@
 
 						}
 
-						if (string.Compare(format, "cvs", StringComparison.InvariantCultureIgnoreCase) == 0)
+						if (string.Compare(format, "csv", StringComparison.InvariantCultureIgnoreCase) == 0)
 						{
 							//create CVSLogData object
-							var cvsData = new CVSLogData()
+							var cvsData = new CsvLogData()
 							{
 								CreationDateTime = DateTimeOffset.Now,
 								Name = "CVSLogData object",
-								Points = new List<CvsLogEntry>()
+								Points = new List<CsvLogEntry>()
 							};
 
 							//and fill Points list
 							foreach (var frame in newFrames)
 							{
-								cvsData.Points.Add(new CvsLogEntry(frame));
+								cvsData.Points.Add(new CsvLogEntry(frame));
 							}
 
 							//cvsData.Points = cvsData.Points.Distinct().ToList();
@@ -359,12 +358,12 @@
 							//writing points to file
 							try
 							{
-								using (var stream = new FileStream(@"out.cvs", FileMode.Create, FileAccess.Write))
+								using (var stream = new FileStream(@"out.csv", FileMode.Create, FileAccess.Write))
 								{
-									Console.WriteLine("Writing \"out.cvs\" file...\n");
+									Console.WriteLine("Writing \"out.csv\" file...\n");
 									stopWatch.Start();
 
-									CVSLogData.WriteToStream(stream, cvsData);
+									CsvLogData.WriteToStream(stream, cvsData);
 
 									stopWatch.Stop();
 									Console.WriteLine("{0} points writing complete.  Writing time: {1} \n", cvsData.Points.Count, stopWatch.Elapsed);

@@ -1,4 +1,4 @@
-﻿namespace SonarLogAPI.CVS
+﻿namespace SonarLogAPI.CSV
 {
 	using System;
 	using System.Collections.Generic;
@@ -8,7 +8,7 @@
 	/// <summary>
 	/// The log entry, consists of Latitude, Longitude and Depth, separated by comma
 	/// </summary>
-	public class CvsLogEntry : IDepthPointSource, IEquatable<CvsLogEntry>
+	public class CsvLogEntry : IDepthPointSource, IEquatable<CsvLogEntry>
 	{
 		/// <summary>
 		/// Represents a geographical location point that is determined by <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> coordinates.
@@ -28,23 +28,23 @@
 		/// <summary>
 		/// CvsLogEntry default constructor
 		/// </summary>
-		public CvsLogEntry() { }
+		public CsvLogEntry() { }
 
 		/// <summary>
 		/// Creates CvsLogEntry from <see cref="IDepthPointSource"/> instance.
 		/// </summary>
-		public CvsLogEntry(IDepthPointSource source)
+		public CsvLogEntry(IDepthPointSource source)
 		{
 			Point = source.Point;
 			Depth = source.Depth;
 		}
 
 		/// <summary>
-		/// Create instance of <see cref="CvsLogEntry" /> object from objects of <see cref="CoordinatePoint" /> add <see cref="LinearDimension" /> double value
+		/// Create instance of <see cref="CsvLogEntry" /> object from objects of <see cref="CoordinatePoint" /> add <see cref="LinearDimension" /> double value
 		/// </summary>
 		/// <param name="point"><see cref="CoordinatePoint" /> object.</param>
 		/// <param name="depth">Depth double value</param>
-		public CvsLogEntry(CoordinatePoint point, LinearDimension depth)
+		public CsvLogEntry(CoordinatePoint point, LinearDimension depth)
 		{
 			Point = point;
 			Depth = depth;
@@ -52,12 +52,12 @@
 
 
 		/// <summary>
-		/// Create instance of <see cref="CvsLogEntry" /> object from objects of <see cref="Latitude" />, <see cref="Longitude" /> add <see cref="LinearDimension" /> double value
+		/// Create instance of <see cref="CsvLogEntry" /> object from objects of <see cref="Latitude" />, <see cref="Longitude" /> add <see cref="LinearDimension" /> double value
 		/// </summary>
 		/// <param name="latitude">Latitude</param>
 		/// <param name="longitude">Longitude</param>
 		/// <param name="depth">Depth double value</param>
-		public CvsLogEntry(Latitude latitude, Longitude longitude, LinearDimension depth)
+		public CsvLogEntry(Latitude latitude, Longitude longitude, LinearDimension depth)
 		{
 			Point = new CoordinatePoint(latitude, longitude);
 			Depth = depth;
@@ -70,11 +70,11 @@
 		/// <param name="longitude">Longitude degrees double value</param>
 		/// <param name="depth">Depth double value</param>
 		/// <param name="depthUnit">Depth value unit</param>
-		public CvsLogEntry(double latitude, double longitude, double depth, LinearDimensionUnit depthUnit) 
+		public CsvLogEntry(double latitude, double longitude, double depth, LinearDimensionUnit depthUnit) 
 			: this(new Latitude(latitude), new Longitude(longitude), new LinearDimension(depth, depthUnit)) { }
 
 		/// <summary>
-		/// TryParse CVS log string, consists of Latitude, Longitude, Depth(and may be other values), separated by comma
+		/// TryParse CSV log string, consists of Latitude, Longitude, Depth(and may be other values), separated by comma
 		/// </summary>
 		/// <param name="cvsLogEntryString">String to parse</param>
 		/// <param name="charForSplit">Char for sting split</param>
@@ -82,9 +82,9 @@
 		/// <param name="valuesOrder">Represent order of CvsLogEntry properties in string</param>
 		/// <param name="result">CvsLogEntry</param>
 		/// <returns>Conversion successed or failed</returns>
-		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, Dictionary<int,string> valuesOrder, out CvsLogEntry result)
+		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, Dictionary<int,string> valuesOrder, out CsvLogEntry result)
 		{
-			result = new CvsLogEntry { UnexpectedValues = new List<string>() };
+			result = new CsvLogEntry { UnexpectedValues = new List<string>() };
 
 			Latitude lat = null;
 			Longitude lon = null;
@@ -137,7 +137,7 @@
 			return true;
 		}
 
-		public bool Equals(CvsLogEntry other)
+		public bool Equals(CsvLogEntry other)
 		{
 			//Check whether the compared object is null. 
 			if (ReferenceEquals(other, null)) return false;
@@ -151,17 +151,17 @@
 
 		public override bool Equals(object obj)
 		{
-			var item = obj as CvsLogEntry;
+			var item = obj as CsvLogEntry;
 
 			return item != null && Equals(item);
 		}
 
-		public static bool operator ==(CvsLogEntry left, CvsLogEntry right)
+		public static bool operator ==(CsvLogEntry left, CsvLogEntry right)
 		{
 			return (object)left != null && (object)right != null && left.Equals(right);
 		}
 
-		public static bool operator !=(CvsLogEntry left, CvsLogEntry right)
+		public static bool operator !=(CsvLogEntry left, CsvLogEntry right)
 		{
 			return !(left == right);
 		}

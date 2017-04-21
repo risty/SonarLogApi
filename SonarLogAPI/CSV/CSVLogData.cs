@@ -1,10 +1,10 @@
-﻿namespace SonarLogAPI.CVS
+﻿namespace SonarLogAPI.CSV
 {
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 
-	public class CVSLogData
+	public class CsvLogData
 	{
 		/// <summary>
 		/// Data Name
@@ -19,14 +19,14 @@
 		/// <summary>
 		/// Depth points
 		/// </summary>
-		public List<CvsLogEntry> Points { get; set; }
+		public List<CsvLogEntry> Points { get; set; }
 
 		/// <summary>
-		/// Writes <see cref="CVSLogData"/> object to <see cref="Stream"/>
+		/// Writes <see cref="CsvLogData"/> object to <see cref="Stream"/>
 		/// </summary>
 		/// <param name="stream"><see cref="Stream"/></param>
-		/// <param name="data"><see cref="CVSLogData"/> object</param>
-		public static void WriteToStream(Stream stream, CVSLogData data)
+		/// <param name="data"><see cref="CsvLogData"/> object</param>
+		public static void WriteToStream(Stream stream, CsvLogData data)
 		{
 			using (var writer = new StreamWriter(stream))
 			{

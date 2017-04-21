@@ -36,7 +36,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CVS\CVSLogData.cs" />
+    <Compile Include="CSV\CSVLogData.cs" />
     <Compile Include="DepthAdjuster.cs" />
     <Compile Include="Primitives\Coordinate.cs" />
     <Compile Include="Primitives\CoordinatePoint.cs" />
@@ -46,7 +46,7 @@
     <Compile Include="Primitives\LinearDimension.cs" />
     <Compile Include="Primitives\IDepthPointSource.cs" />
     <Compile Include="Primitives\Longitude.cs" />
-    <Compile Include="CVS\CvsLogEntry.cs" />
+    <Compile Include="CSV\CsvLogEntry.cs" />
     <Compile Include="Primitives\Latitude.cs" />
     <Compile Include="Localization\ProjectDescriptions.cs" />
     <Compile Include="Lowrance\SoundedData.cs" />

@@ -1,6 +1,6 @@
 # SonarLogApi
 Small C# API for working with sonar log files.
-Now it supports SL2 and SL3 log files formats from Lowrance(Simrad, B&G) and CVS format.
+Now it supports SL2 and SL3 log files formats from Lowrance(Simrad, B&G) and CSV format.
 
 # ConsileLogConverter 
 It's example project for log files conversion.
@@ -14,13 +14,13 @@ And finally it takes four bytes at 30 offset from each frame start and represent
 of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).
 
 Conversion mode.
-"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:cvs"
+"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:csv"
 Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index 
-from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with "sl2" and "cvs" format.
+from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with "sl2" and "csv" format.
 
 Depth Ajust.
 There are situations where the depth in one log is necessary to ajust to the depth in another log.
-"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o cvs"
-Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with "cvs".
+"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o csv"
+Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with "csv".
 
 Also you can combine modes.
