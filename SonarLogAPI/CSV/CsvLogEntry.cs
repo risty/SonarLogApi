@@ -2,8 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 
-	using Primitives;
+	using Primitives;	
 
 	/// <summary>
 	/// The log entry, consists of Latitude, Longitude and Depth, separated by comma
@@ -173,7 +174,7 @@
 
 		public override string ToString()
 		{
-			return $"{Point},{Depth.GetMeters()}";
+			return $"{Point},{Depth.GetMeters().ToString(CultureInfo.InvariantCulture)}";
 		}
 
 	}
