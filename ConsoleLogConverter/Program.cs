@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -15,7 +16,7 @@
 	using SonarLogAPI.Lowrance;
 	using SonarLogAPI.Primitives;
 
-	class Program
+	public class Program
 	{
 		class Options
 		{
@@ -55,6 +56,10 @@
 				 HelpText = "Prints all messages to standard output.")]
 			public bool Verbose { get; set; }
 
+			[Option('h', "dshift", Required = false,
+				 HelpText = "Depth value for adding or subtraction to the depth values in the log.")]
+			public string DepthShift { get; set; }
+
 			[HelpOption]
 			public string GetUsage()
 			{
@@ -67,6 +72,8 @@
 				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with \"sl2\" and \"csv\" format.\n\n");
 				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o csv\"\n");
 				text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"csv\" format.\n\n");
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -h m1.15 -o csv\"\n");
+				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substract and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and save frames to \"csv\" format.\n\n");
 				return text;
 			}
 
@@ -131,6 +138,29 @@
 			return data;
 		}
 
+
+		public static bool DepthShiftTryParse(string inputString, out double value)
+		{
+			value = double.NaN;
+			var nfi = new NumberFormatInfo
+			{
+				NegativeSign = "m",
+				PositiveSign = "p"
+			};
+
+			try
+			{
+				value = double.Parse(inputString, nfi);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("Can't parse Depth Shift. Full error message:\"{0}\"", e);
+			}
+
+
+			return !double.IsNaN(value);
+		}
+
 		static void Main(string[] args)
 		{
 			var options = new Options();
@@ -150,6 +180,8 @@
 
 				//Read Files
 				var data = ReadFile(options.InputFile, options.Verbose);
+
+				#region Depth Adjust
 
 				if (!string.IsNullOrWhiteSpace(options.DepthAdjustFile))
 				{
@@ -183,7 +215,37 @@
 						data.Frames.Add((Frame)point);
 					}
 
-				}	
+				}
+				#endregion
+
+				#region Depth Shift
+
+				//add or substract depth shift for all frames in data
+				if (!string.IsNullOrWhiteSpace(options.DepthShift))
+				{
+					if (options.Verbose)
+					{
+						Console.WriteLine("Add or substract depth shift for all frames in data...");
+						Console.WriteLine("Try parse depth shift value.");
+					}
+
+					double value;
+
+					if (DepthShiftTryParse(options.DepthShift, out value))
+					{
+						if (options.Verbose) Console.WriteLine("Depth shift value is:{0}", value);
+
+						//applying depth shift for all frames in data
+						foreach (var frame in data.Frames)
+						{
+							frame.Depth = new LinearDimension(frame.Depth.GetMeters() + value, LinearDimensionUnit.Meter);
+						}
+					}
+
+				}
+				#endregion
+
+				#region Research mode consloe output
 
 				//if research mode, then opens file again
 				if (options.SearchOffset >= 0)
@@ -239,6 +301,10 @@
 					}
 				}
 
+				#endregion
+
+				#region Creating output file
+
 				//makes outut file if it necessary
 				if (options.OutputFileVersion != null && options.OutputFileVersion.Any())
 				{
@@ -280,6 +346,9 @@
 					//checks output formats and write to files
 					foreach (var format in options.OutputFileVersion)
 					{
+
+						#region Creating SL2
+
 						if (string.Compare(format, "sl2", StringComparison.InvariantCultureIgnoreCase) == 0)
 						{
 							//if original header have the same format then reuse it
@@ -304,6 +373,9 @@
 							}
 
 						}
+						#endregion
+
+						#region Creating SL3
 
 						if (string.Compare(format, "sl3", StringComparison.InvariantCultureIgnoreCase) == 0)
 						{
@@ -329,6 +401,9 @@
 							}
 
 						}
+						#endregion
+
+						#region Creating CVS
 
 						if (string.Compare(format, "csv", StringComparison.InvariantCultureIgnoreCase) == 0)
 						{
@@ -378,8 +453,10 @@
 
 						}
 
+						#endregion
 					}
 				}
+				#endregion
 
 				Console.WriteLine("Please press any key to exit...");
 				Console.ReadKey(true);
