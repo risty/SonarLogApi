@@ -162,22 +162,7 @@
 		#region Frame Properties
 
 		/// <summary>
-		/// of current <see cref="Frame"/> offset from the file begin, in bytes
-		/// </summary>
-		//public int FrameOffset { get; set; }
-
-		/// <summary>
-		/// Size of current <see cref="Frame"/> in bytes. Bytes to next frame Start
-		/// </summary>
-		public short ThisFrameSize { get; set; }
-
-		/// <summary>
-		/// Size of previous of current <see cref="Frame"/>(frameIndex -1) in bytes. Bytes to previous frame Start.
-		/// </summary>
-		//public short PreviousFrameSize { get; set; }
-
-		/// <summary>
-		/// ChannelType
+		/// Type of channel
 		/// </summary>
 		public ChannelType ChannelType { get; set; }
 
@@ -191,15 +176,15 @@
 		/// </summary>
 		public int FrameIndex { get; set; }
 
-		/// <summary>
-		/// Upper limit of <see cref="SoundedData" />
-		/// </summary>
-		public LinearDimension UpperLimit { get; set; }
+		///// <summary>
+		///// Upper limit of <see cref="SoundedData" />
+		///// </summary>
+		//public LinearDimension UpperLimit { get; set; }
 
-		/// <summary>
-		/// Lower limit of <see cref="SoundedData" />
-		/// </summary>
-		public LinearDimension LowerLimit { get; set; }
+		///// <summary>
+		///// Lower limit of <see cref="SoundedData" />
+		///// </summary>
+		//public LinearDimension LowerLimit { get; set; }
 
 		/// <summary>
 		/// Sonar Frequency
@@ -266,7 +251,7 @@
 		/// <summary>
 		/// Contains sounding/bounce data
 		/// </summary>
-		public byte[] SoundedData { get; set; }
+		public SoundedData SoundedData { get; set; }
 
 		#endregion
 
@@ -351,7 +336,7 @@
 			// for size is 2800 = "__ __ 00 00"
 			2800,
 
-			// for size is 2800 = "__ __ 00 00"
+			// for size is 1400 = "__ __ 00 00"
 			1400,
 		};
 
@@ -490,20 +475,20 @@
 			 */
 
 			//frame.FrameOffset = GetInt(reader, frameStartByteOffset + GetOffset(slType, "FrameOffset"));
-			frame.ThisFrameSize = GetShort(reader, frameStartByteOffset + GetOffset(slType, "ThisFrameSize"));
+			var thisFrameSize = GetShort(reader, frameStartByteOffset + GetOffset(slType, "ThisFrameSize"));
 			//frame.PreviousFrameSize = GetShort(reader, frameStartByteOffset + GetOffset(slType, "PreviousFrameSize"));
 			frame.ChannelType = (ChannelType)GetShort(reader, frameStartByteOffset + GetOffset(slType, "ChannelType"));
 
 			//if ChannelType == ThreeD then correct PacketSize.
 			if (frame.ChannelType == ChannelType.ThreeD)
-				frame.PacketSize = (short)(frame.ThisFrameSize - 168);
+				frame.PacketSize = (short)(thisFrameSize - 168);
 			else
 				frame.PacketSize = GetShort(reader, frameStartByteOffset + GetOffset(slType, "PacketSize"));
 
 			frame.FrameIndex = GetInt(reader, frameStartByteOffset + GetOffset(slType, "FrameIndex"));
-			frame.UpperLimit = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "UpperLimit")),
+			var upperLimit = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "UpperLimit")),
 				LinearDimensionUnit.Foot);
-			frame.LowerLimit = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "LowerLimit")),
+			var lowerLimit = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "LowerLimit")),
 				LinearDimensionUnit.Foot);
 			frame.Frequency = (Frequency)GetBytes(reader, frameStartByteOffset + GetOffset(slType, "Frequency"), 1)[0];
 			frame.Depth = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "Depth")), LinearDimensionUnit.Foot);
@@ -551,7 +536,8 @@
 					frame.Flags.Add(FrameFlags.HeadingValid);
 			}
 			frame.TimeOffset = TimeSpan.FromMilliseconds(GetInt(reader, frameStartByteOffset + GetOffset(slType, "TimeOffset")));
-			frame.SoundedData = GetBytes(reader, frameStartByteOffset + GetOffset(slType, "SoundedData"), frame.PacketSize);
+			var bytesForSoundedData = GetBytes(reader, frameStartByteOffset + GetOffset(slType, "SoundedData"), frame.PacketSize);
+			frame.SoundedData = new SoundedData(bytesForSoundedData, frame.ChannelType, upperLimit, lowerLimit);
 
 			return frame;
 		}
@@ -617,8 +603,8 @@
 				//write zero in 2 bytes (offset 14-16)
 				writer.Write(new short());
 				writer.Write(frame.FrameIndex);
-				writer.Write((float)frame.UpperLimit.GetFoots());
-				writer.Write((float)frame.LowerLimit.GetFoots());
+				writer.Write((float)frame.SoundedData.UpperLimit.GetFoots());
+				writer.Write((float)frame.SoundedData.LowerLimit.GetFoots());
 				//write zero in 16 bytes (offset 28 to 44)
 				writer.Write(new long());
 				writer.Write(new long());
@@ -688,7 +674,7 @@
 				writer.Write(new long());
 				writer.Write(new int());
 				writer.Write(lastThreeDChannelFrameOffset);
-				writer.Write(frame.SoundedData);
+				writer.Write(frame.SoundedData.Data);
 
 				frameOffset += newFrameSize;
 			}
@@ -699,7 +685,7 @@
 		{
 			//takes frame with channel type != ChannelType.ThreeD and sort it after
 			framesToWrite = framesToWrite.Where(x => x.ChannelType != ChannelType.ThreeD).ToList();
-			
+
 			//sort before writing
 			framesToWrite.Sort();
 
@@ -766,8 +752,8 @@
 				writer.Write((short)frame.ChannelType);
 				writer.Write(frame.PacketSize);
 				writer.Write(frame.FrameIndex);
-				writer.Write((float)frame.UpperLimit.GetFoots());
-				writer.Write((float)frame.LowerLimit.GetFoots());
+				writer.Write((float)frame.SoundedData.UpperLimit.GetFoots());
+				writer.Write((float)frame.SoundedData.LowerLimit.GetFoots());
 				//write zero in two bytes (offset 48)
 				writer.Write(new short());
 				writer.Write((byte)frame.Frequency);
@@ -843,7 +829,7 @@
 				writer.Write(timeOffsetMiliseconds);
 				//increase offset value
 				timeOffsetMiliseconds++;
-				writer.Write(frame.SoundedData);
+				writer.Write(frame.SoundedData.Data);
 			}
 		}
 
@@ -985,6 +971,257 @@
 		{
 			return BitConverter.ToSingle(bytes, 0);
 		}
+
+		/// <summary>
+		/// Generate frame based on frame from the base channel.
+		/// </summary>
+		/// <param name="requiredChannelType"><see cref="ChannelType"/> for a new(generated) frame.</param>
+		/// <param name="sourceFrame"></param>
+		/// <param name="generateSoundedData">Gererate sounded data. By default:false(take from source frame).</param>
+		/// <returns>New(generated) frame.</returns>
+		public static Frame GenerateFromOtherChannelFrame(ChannelType requiredChannelType, Frame sourceFrame, bool generateSoundedData = false)
+		{
+			if (requiredChannelType == sourceFrame.ChannelType)
+				throw new ArgumentException("requiredChannelType the same as source frame channel", nameof(requiredChannelType));
+
+			if (requiredChannelType == ChannelType.ThreeD)
+				throw new NotImplementedException("Cant generate 3D channel frame.");
+
+			var frame = new Frame
+			{
+				Altitude = sourceFrame.Altitude,
+				ChannelType = requiredChannelType,
+				CourseOverGround = sourceFrame.CourseOverGround,
+				Depth = sourceFrame.Depth,
+				Flags = sourceFrame.Flags,
+				FrameIndex = sourceFrame.FrameIndex,
+				Frequency = Frequency.Frequency_200KHz,
+				SpeedGps = sourceFrame.SpeedGps,
+				Heading = sourceFrame.Heading,
+				KeelDepth = sourceFrame.KeelDepth,
+				Point = sourceFrame.Point,
+				Temperature = sourceFrame.Temperature,
+				TimeOffset = sourceFrame.TimeOffset,
+				WaterSpeed = sourceFrame.WaterSpeed,
+
+			};
+
+			switch (requiredChannelType)
+			{
+				case ChannelType.Primary:
+				case ChannelType.Secondary:
+				case ChannelType.DownScan:
+				case ChannelType.SidescanRight:
+					#region source channel switch
+					//if sounded data needs to be generated
+					if (generateSoundedData)
+					{
+						frame.PacketSize = 1440;
+
+						//lower limit calc from depth value
+						var dptInMeters = frame.Depth.GetMeters();
+						var lowerLimit = LinearDimension.FromMeters(Math.Ceiling(dptInMeters / 5) * 5 + 1);
+
+						frame.SoundedData = SoundedData.GenerateData(frame.PacketSize, requiredChannelType,
+							frame.Depth, LinearDimension.FromMeters(0), lowerLimit);
+					}
+
+					switch (sourceFrame.ChannelType)
+					{
+						case ChannelType.Primary:
+						case ChannelType.Secondary:
+						case ChannelType.DownScan:
+						case ChannelType.SidescanRight:
+
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = sourceFrame.PacketSize;
+								frame.SoundedData = sourceFrame.SoundedData;
+							}
+
+							break;
+						case ChannelType.SidescanLeft:
+
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = sourceFrame.PacketSize;
+								var upperLimit = LinearDimension.FromMeters(0);
+								var lowerLimit = sourceFrame.SoundedData.UpperLimit * -1;
+								frame.SoundedData = new SoundedData(sourceFrame.SoundedData.Data.Reverse().ToArray(), requiredChannelType,
+									upperLimit, lowerLimit);
+							}
+
+							break;
+
+						case ChannelType.SidescanComposite:
+
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = (short)(sourceFrame.PacketSize / 2);
+								var upperLimit = LinearDimension.FromMeters(0);
+								var lowerLimit = sourceFrame.SoundedData.LowerLimit;
+
+								//array for right side
+								var sidescanRight = new byte[frame.PacketSize];
+
+								//copy right side to array
+								sourceFrame.SoundedData.Data.Where((b, i) => i >= frame.PacketSize).ToArray().CopyTo(sidescanRight, 0);
+
+								//create SoundedData
+								frame.SoundedData = new SoundedData(sidescanRight, requiredChannelType,
+									upperLimit, lowerLimit);
+							}
+
+							break;
+						case ChannelType.ThreeD:
+
+							if (!generateSoundedData)
+								throw new NotImplementedException("Can't take sounded data from 3D channel");
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+					#endregion
+					break;
+				case ChannelType.SidescanLeft:
+					#region source channel switch
+
+					//if sounded data needs to be generated
+					if (generateSoundedData)
+					{
+						frame.PacketSize = 1440;
+						var lowerLimit = LinearDimension.FromMeters(0);
+
+						//UpperLimit calc from depth value
+						var dptInMeters = frame.Depth.GetMeters();
+						var upperLimit = LinearDimension.FromMeters(Math.Ceiling(dptInMeters / 5) * 5 + 1) * -1;
+
+						frame.SoundedData = SoundedData.GenerateData(frame.PacketSize, requiredChannelType,
+							frame.Depth, upperLimit, lowerLimit);
+
+					}
+
+					switch (sourceFrame.ChannelType)
+					{
+						case ChannelType.Primary:
+						case ChannelType.Secondary:
+						case ChannelType.DownScan:
+						case ChannelType.SidescanRight:
+							//if sounded data needs to be generated
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = sourceFrame.PacketSize;
+								var upperLimit = sourceFrame.SoundedData.LowerLimit * -1;
+								var lowerLimit = LinearDimension.FromMeters(0);
+								frame.SoundedData = new SoundedData(sourceFrame.SoundedData.Data.Reverse().ToArray(), requiredChannelType,
+									upperLimit, lowerLimit);
+							}
+							break;
+						case ChannelType.SidescanLeft:
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = sourceFrame.PacketSize;
+								frame.SoundedData = sourceFrame.SoundedData;
+							}
+							break;
+
+						case ChannelType.SidescanComposite:
+
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = (short)(sourceFrame.PacketSize / 2);
+								var upperLimit = sourceFrame.SoundedData.UpperLimit;
+								var lowerLimit = LinearDimension.FromMeters(0);
+
+								//array for left side
+								var sidescanLeft = new byte[frame.PacketSize];
+
+								//copy left side to array
+								sourceFrame.SoundedData.Data.Where((b, i) => i < frame.PacketSize).ToArray().CopyTo(sidescanLeft, 0);
+
+								//create SoundedData
+								frame.SoundedData = new SoundedData(sidescanLeft, requiredChannelType,
+									upperLimit, lowerLimit);
+							}
+
+							break;
+						case ChannelType.ThreeD:
+							if (!generateSoundedData)
+								throw new NotImplementedException("Can't take sounded data from 3D channel");
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+					#endregion
+					break;
+				case ChannelType.SidescanComposite:
+					#region source channel switch
+
+					//if sounded data needs to be generated
+					if (generateSoundedData)
+					{
+						frame.PacketSize = 2880;
+
+						frame.SoundedData = SoundedData.GenerateData(frame.PacketSize, requiredChannelType,
+							frame.Depth, LinearDimension.FromMeters(-48), LinearDimension.FromMeters(48));
+					}
+
+					switch (sourceFrame.ChannelType)
+					{
+						case ChannelType.Primary:
+						case ChannelType.Secondary:
+						case ChannelType.DownScan:
+						case ChannelType.SidescanRight:
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = (short)(sourceFrame.PacketSize * 2);
+								var sidescanCompositeArray = new byte[frame.PacketSize];
+								sourceFrame.SoundedData.Data.Reverse().ToArray().CopyTo(sidescanCompositeArray, 0);
+								sourceFrame.SoundedData.Data.CopyTo(sidescanCompositeArray, sourceFrame.PacketSize);
+								frame.SoundedData = new SoundedData(sidescanCompositeArray, requiredChannelType,
+									sourceFrame.SoundedData.LowerLimit * -1, sourceFrame.SoundedData.LowerLimit);
+
+							}
+							break;
+
+						case ChannelType.SidescanLeft:
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = (short)(sourceFrame.PacketSize * 2);
+								var sidescanCompositeArray = new byte[frame.PacketSize];
+
+								sourceFrame.SoundedData.Data.CopyTo(sidescanCompositeArray, 0);
+								sourceFrame.SoundedData.Data.Reverse().ToArray().CopyTo(sidescanCompositeArray, sourceFrame.PacketSize);
+
+								frame.SoundedData = new SoundedData(sidescanCompositeArray, requiredChannelType,
+									sourceFrame.SoundedData.UpperLimit, sourceFrame.SoundedData.UpperLimit * -1);
+							}
+
+							break;
+						case ChannelType.SidescanComposite:
+							if (!generateSoundedData)
+							{
+								frame.PacketSize = sourceFrame.PacketSize;
+								frame.SoundedData = sourceFrame.SoundedData;
+							}
+							break;
+						case ChannelType.ThreeD:
+							if (!generateSoundedData)
+								throw new NotImplementedException("Can't take sounded data from 3D channel");
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+					#endregion
+					break;
+				case ChannelType.ThreeD:
+					throw new NotImplementedException("Can't generate " + requiredChannelType + " frame.");
+				default:
+					throw new ArgumentOutOfRangeException(nameof(requiredChannelType), requiredChannelType, null);
+			}
+			return frame;
+		}
+
 
 		public override string ToString()
 		{
