@@ -37,7 +37,7 @@
 			public IList<string> OutputFileVersion { get; set; }
 
 			[OptionList('c', "channel", Separator = ':', Required = false,
-				 HelpText = "By default: all channels. Channels in destination file. By default - all channels. Primary = 0, Secondary = 1, DownScan = 2, SidescanLeft = 3, SidescanRight = 4, SidescanComposite = 5, ThreeD = 9")]
+				 HelpText = "Channels, included in output file. Format: channel numbers, separated by colon. By default: all channels. Primary = 0, Secondary = 1, DownScan = 2, SidescanLeft = 3, SidescanRight = 4, SidescanComposite = 5, ThreeD = 9")]
 			public IList<string> Channels { get; set; }
 
 			[Option('f', "from", DefaultValue = uint.MinValue,
@@ -60,6 +60,22 @@
 				 HelpText = "Depth value for adding or subtraction to the depth values in the log.")]
 			public string DepthShift { get; set; }
 
+			[OptionList('g', "generate", Separator = ':', Required = false,
+				 HelpText = "Generate frames for specific channel from the frames at other channel(s). Format: numbers and chars, " +
+							"separated by colon. " +
+							"Options: numbers - destionation frame channel and source channel(s); " +
+				            "d - if specified generate sounded data from source frame depth value,(otherwise take sounded " +
+							"data from source frame); f - if specified generate frame in destination channel even if frame with " +
+				            "such coordinates already exist." +
+				            "Examples: \"-g 0:2:\" - find in the 2th channel(DownScan) frames with coordinates " +
+							"that are absent in the 0th channel(Primary) and generate frames with such coordinates in the 0th " +
+							"channel. \"-g 1:2:5:f\" - get frames from 2th(DownScan) and 5th (SidescanComposite) channels and " +
+							"group em by unique coordinates. After that generate 1th(Secondary) channel frames (even frames with " +
+							"coordinates from 2th and 5th chanel are in 1th(\"f\" option)). \"-g 0:5:d\" - get frames from 5th " +
+				            "(SidescanComposite) channel and generate frames (with generatend by depth(\"d\" option) SoundedData) for 0th(Primary) " +
+				            "channel if they are not allready exist.")]
+			public IList<string> GenegateParams { get; set; }
+
 			[HelpOption]
 			public string GetUsage()
 			{
@@ -74,6 +90,8 @@
 				text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"csv\" format.\n\n");
 				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -h m1.15 -o csv\"\n");
 				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substract and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and save frames to \"csv\" format.\n\n");
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -g 0:5:f -o sl2\"\n");
+				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it generate all(\"f\" option) the frames at 0th(Primary) channel from 5th(SidescanComposite) clannel and finally save frames from all input file channels to \"sl2\" format.\n\n");
 				return text;
 			}
 
@@ -108,7 +126,7 @@
 		{
 			var stopWatch = new Stopwatch();
 			if (verbose)
-				Console.WriteLine("Reads filename: {0}\n", filename);
+				Console.WriteLine("Reads file: {0}\n", filename);
 
 			LowranceLogData data;
 			try
@@ -170,10 +188,10 @@
 				Console.WindowWidth = 120;
 
 				//convert channels from string to enum
-				var channels = new List<ChannelType>();
+				var outputchannels = new List<ChannelType>();
 				if (options.Channels != null && options.Channels.Any())
 				{
-					channels.AddRange(options.Channels.Select(channel => (ChannelType)Enum.Parse(typeof(ChannelType), channel)));
+					outputchannels.AddRange(options.Channels.Select(channel => (ChannelType)Enum.Parse(typeof(ChannelType), channel)));
 				}
 
 				var stopWatch = new Stopwatch();
@@ -190,6 +208,9 @@
 
 					if (options.Verbose)
 					{
+						Console.WriteLine("Depth adjust option enabled.");
+						Console.WriteLine("Adjust file name:\"{0}\".", options.DepthAdjustFile);
+
 						da.NearestPointsFound += (o, e) =>
 						{
 							Console.WriteLine("Nearest points are:\nBase - {0} with {1} depth.\nAdjust - {2} with {3}.",
@@ -225,8 +246,8 @@
 				{
 					if (options.Verbose)
 					{
-						Console.WriteLine("Add or substract depth shift for all frames in data...");
-						Console.WriteLine("Try parse depth shift value.");
+						Console.WriteLine("Depth shift option enabled.");
+						Console.WriteLine("Trying parse depth shift value...");
 					}
 
 					double value;
@@ -243,6 +264,94 @@
 					}
 
 				}
+				#endregion
+
+				#region Generate channels frames
+				//check generate parametrs
+				if (options.GenegateParams != null && options.GenegateParams.Any())
+				{
+					if (options.Verbose)
+					{
+						Console.WriteLine("Generate frames for specific channel option enabled.");
+						Console.WriteLine("Try parse parametrs...");
+					}
+					var dstChannel = new List<ChannelType>();
+					var sourceChannels = new List<ChannelType>();
+					var forceGenerate = false;
+					var generateFromDepth = false;
+					foreach (var optionsGenegateParam in options.GenegateParams)
+					{
+						ChannelType channelType;
+
+						if (Enum.TryParse(optionsGenegateParam, out channelType))
+						{
+							if (!dstChannel.Any()) dstChannel.Add(channelType);
+							else sourceChannels.Add(channelType);
+						}
+						if (string.Compare(optionsGenegateParam, "f", StringComparison.InvariantCultureIgnoreCase) == 0)
+							forceGenerate = true;
+						if (string.Compare(optionsGenegateParam, "d", StringComparison.InvariantCultureIgnoreCase) == 0)
+							generateFromDepth = true;
+					}
+
+					if (options.Verbose)
+					{
+						Console.Write("Source channel(s) are:");
+						foreach (var sourceChannel in sourceChannels)
+						{
+							Console.Write(sourceChannel + ",");
+						}
+						Console.Write("\n");
+						Console.WriteLine("Channel for frame generation is:{0}", dstChannel.FirstOrDefault());
+
+						Console.WriteLine("Force erase points at destination channel before generate(\"f\" option): {0}", forceGenerate);
+						Console.WriteLine("Generate sounded data from depth value(\"d\" option): {0}", generateFromDepth);
+
+						if (!sourceChannels.Any()) Console.WriteLine("There is no channels for frame generation. Skip generation option.");
+					}
+
+					//continue if sourceChannels.Any()
+					if (sourceChannels.Any())
+					{
+						//get unique frames from sourse channel(s)
+						var unicueFrameFromSourceChanels = data.Frames
+							.Where(frame => sourceChannels.Contains(frame.ChannelType))
+							.GroupBy(frame => frame.Point)
+							.Select(g => g.First())
+							.ToList();
+
+						var erasedPointsCountAtDstChannel = 0;
+						//erase dstChannel frames from data
+						if (forceGenerate)
+						{
+							erasedPointsCountAtDstChannel = data.Frames.RemoveAll(frame => frame.ChannelType == dstChannel.FirstOrDefault());		
+						}
+
+						//get points for existed dst channel frames
+						var dstChannelFramesPoints = data.Frames
+							.Where(frame => frame.ChannelType == dstChannel.FirstOrDefault())
+							.Select(frame => frame.Point).ToList();
+
+						//generate and add frame for each unique point
+						foreach (var unicueFrame in unicueFrameFromSourceChanels)
+						{
+							if (!dstChannelFramesPoints.Contains(unicueFrame.Point))
+							{
+								data.Frames.Add(Frame.GenerateFromOtherChannelFrame(dstChannel.FirstOrDefault(), unicueFrame, generateFromDepth));
+							}
+						}
+
+						if (options.Verbose)
+						{
+							Console.WriteLine("Unique points at source channel(s):{0}", unicueFrameFromSourceChanels.Count);
+							if (forceGenerate)
+								Console.WriteLine("Points erased at destination channel:{0}", erasedPointsCountAtDstChannel);
+							Console.WriteLine("Points added to destination channel:{0}", unicueFrameFromSourceChanels.Count- dstChannelFramesPoints.Count);
+						}
+					}
+				}
+
+
 				#endregion
 
 				#region Research mode consloe output
@@ -272,7 +381,7 @@
 									var tuple = researchResult[offset];
 
 									//skip Console.WriteLine if frame channel is not selected
-									if (channels.Any() && !channels.Contains(tuple.Item7))
+									if (outputchannels.Any() && !outputchannels.Contains(tuple.Item7))
 										continue;
 
 									//skip Console.WriteLine if frame is not inside diapason
@@ -312,7 +421,7 @@
 					{
 						var isIndexValid = frame.FrameIndex >= options.FramesFrom && frame.FrameIndex <= options.FramesTo;
 
-						return channels.Any() ? channels.Contains(frame.ChannelType) && isIndexValid : isIndexValid;
+						return outputchannels.Any() ? outputchannels.Contains(frame.ChannelType) && isIndexValid : isIndexValid;
 
 					};
 
