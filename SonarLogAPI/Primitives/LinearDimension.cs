@@ -101,6 +101,27 @@
 		}
 
 		/// <summary>
+		/// Create <see cref="LinearDimension"/> object from value in meters
+		/// </summary>
+		/// <param name="meters">Value in meters</param>
+		/// <returns><see cref="LinearDimension"/> object</returns>
+		public static LinearDimension FromMeters(double meters)
+		{
+			return new LinearDimension(meters,LinearDimensionUnit.Meter);
+		}
+
+		/// <summary>
+		/// Create <see cref="LinearDimension"/> object from value in foots
+		/// </summary>
+		/// <param name="foots">Value in foots</param>
+		/// <returns><see cref="LinearDimension"/> object</returns>
+		public static LinearDimension FromFoots(double foots)
+		{
+			return new LinearDimension(foots, LinearDimensionUnit.Foot);
+		}
+
+
+		/// <summary>
 		/// Converts the string representation of LinearDimension value to <see cref="LinearDimension"/> object
 		/// </summary>
 		/// <param name="stringvalue">String representation of <see cref="LinearDimension"/> value</param>
@@ -176,6 +197,16 @@
 		public static LinearDimension operator -(LinearDimension left, LinearDimension right)
 		{
 			return new LinearDimension(left.GetMeters() - right.GetMeters(), LinearDimensionUnit.Meter);
+		}
+
+		public static LinearDimension operator *(LinearDimension left, double right)
+		{
+			return new LinearDimension(left.GetMeters() * right, LinearDimensionUnit.Meter);
+		}
+
+		public static double operator /(LinearDimension left, LinearDimension right)
+		{
+			return left.GetMeters() / right.GetMeters();
 		}
 
 		public override string ToString()
