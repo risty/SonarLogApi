@@ -125,8 +125,7 @@
 			Assert.AreEqual(firstFrameList[0].ChannelType, secondFrameList[0].ChannelType);
 			Assert.AreEqual(firstFrameList[0].PacketSize, secondFrameList[0].PacketSize);
 			Assert.AreEqual(firstFrameList[0].FrameIndex, secondFrameList[0].FrameIndex);
-			Assert.AreEqual(firstFrameList[0].UpperLimit, secondFrameList[0].UpperLimit);
-			Assert.AreEqual(firstFrameList[0].LowerLimit, secondFrameList[0].LowerLimit);
+
 			Assert.AreEqual(firstFrameList[0].Frequency, secondFrameList[0].Frequency);
 			Assert.AreEqual(firstFrameList[0].Frequency, secondFrameList[0].Frequency);
 			Assert.AreEqual(firstFrameList[0].Depth, secondFrameList[0].Depth);
@@ -141,14 +140,15 @@
 			Assert.AreEqual(firstFrameList[0].Heading, secondFrameList[0].Heading);
 			Assert.AreEqual(firstFrameList[0].Flags.Count, secondFrameList[0].Flags.Count);
 			//Assert.AreEqual(firstFrameList[0].TimeOffset.TotalMilliseconds, secondFrameList[0].TimeOffset.TotalMilliseconds);
-			Assert.AreEqual(firstFrameList[0].SoundedData, secondFrameList[0].SoundedData);
+			Assert.AreEqual(firstFrameList[0].SoundedData.LowerLimit, secondFrameList[0].SoundedData.LowerLimit);
+			Assert.AreEqual(firstFrameList[0].SoundedData.UpperLimit, secondFrameList[0].SoundedData.UpperLimit);
+			Assert.AreEqual(firstFrameList[0].SoundedData.Data, secondFrameList[0].SoundedData.Data);
+			Assert.AreEqual(firstFrameList[0].SoundedData.ChannelType, secondFrameList[0].SoundedData.ChannelType);
 
 			//check properties of second frame
 			Assert.AreEqual(firstFrameList[1].ChannelType, secondFrameList[1].ChannelType);
 			Assert.AreEqual(firstFrameList[1].PacketSize, secondFrameList[1].PacketSize);
 			Assert.AreEqual(firstFrameList[1].FrameIndex, secondFrameList[1].FrameIndex);
-			Assert.AreEqual(firstFrameList[1].UpperLimit, secondFrameList[1].UpperLimit);
-			Assert.AreEqual(firstFrameList[1].LowerLimit, secondFrameList[1].LowerLimit);
 			Assert.AreEqual(firstFrameList[1].Frequency, secondFrameList[1].Frequency);
 			Assert.AreEqual(firstFrameList[1].Frequency, secondFrameList[1].Frequency);
 			Assert.AreEqual(firstFrameList[1].Depth, secondFrameList[1].Depth);
@@ -162,7 +162,10 @@
 			Assert.AreEqual(firstFrameList[1].Altitude, secondFrameList[1].Altitude);
 			Assert.AreEqual(firstFrameList[1].Heading, secondFrameList[1].Heading);
 			Assert.AreEqual(firstFrameList[1].Flags, secondFrameList[1].Flags);
-			Assert.AreEqual(firstFrameList[1].SoundedData, secondFrameList[1].SoundedData);
+			Assert.AreEqual(firstFrameList[1].SoundedData.LowerLimit, secondFrameList[1].SoundedData.LowerLimit);
+			Assert.AreEqual(firstFrameList[1].SoundedData.UpperLimit, secondFrameList[1].SoundedData.UpperLimit);
+			Assert.AreEqual(firstFrameList[1].SoundedData.Data, secondFrameList[1].SoundedData.Data);
+			Assert.AreEqual(firstFrameList[1].SoundedData.ChannelType, secondFrameList[1].SoundedData.ChannelType);
 
 		}
 
@@ -225,8 +228,7 @@
 			Assert.AreEqual(firstFrameList[0].ChannelType, secondFrameList[0].ChannelType);
 			Assert.AreEqual(firstFrameList[0].PacketSize, secondFrameList[0].PacketSize);
 			Assert.AreEqual(firstFrameList[0].FrameIndex, secondFrameList[0].FrameIndex);
-			Assert.AreEqual(firstFrameList[0].UpperLimit, secondFrameList[0].UpperLimit);
-			Assert.AreEqual(firstFrameList[0].LowerLimit, secondFrameList[0].LowerLimit);
+
 			Assert.AreEqual(firstFrameList[0].Frequency, secondFrameList[0].Frequency);
 			Assert.AreEqual(firstFrameList[0].Frequency, secondFrameList[0].Frequency);
 			Assert.AreEqual(firstFrameList[0].Depth, secondFrameList[0].Depth);
@@ -241,14 +243,15 @@
 			Assert.AreEqual(firstFrameList[0].Heading, secondFrameList[0].Heading);
 			//Assert.AreEqual(firstFrameList[0].Flags.Count, secondFrameList[0].Flags.Count);
 			//Assert.AreEqual(firstFrameList[0].TimeOffset.TotalMilliseconds, secondFrameList[0].TimeOffset.TotalMilliseconds);
-			Assert.AreEqual(firstFrameList[0].SoundedData, secondFrameList[0].SoundedData);
+			Assert.AreEqual(firstFrameList[0].SoundedData.Data, secondFrameList[0].SoundedData.Data);
+			Assert.AreEqual(firstFrameList[0].SoundedData.ChannelType, secondFrameList[0].SoundedData.ChannelType);
+			Assert.AreEqual(firstFrameList[0].SoundedData.LowerLimit, secondFrameList[0].SoundedData.LowerLimit);
+			Assert.AreEqual(firstFrameList[0].SoundedData.UpperLimit, secondFrameList[0].SoundedData.UpperLimit);
 
 			//check properties of second frame
 			Assert.AreEqual(firstFrameList[1].ChannelType, secondFrameList[1].ChannelType);
 			Assert.AreEqual(firstFrameList[1].PacketSize, secondFrameList[1].PacketSize);
 			Assert.AreEqual(firstFrameList[1].FrameIndex, secondFrameList[1].FrameIndex);
-			Assert.AreEqual(firstFrameList[1].UpperLimit, secondFrameList[1].UpperLimit);
-			Assert.AreEqual(firstFrameList[1].LowerLimit, secondFrameList[1].LowerLimit);
 			Assert.AreEqual(firstFrameList[1].Frequency, secondFrameList[1].Frequency);
 			Assert.AreEqual(firstFrameList[1].Frequency, secondFrameList[1].Frequency);
 			Assert.AreEqual(firstFrameList[1].Depth, secondFrameList[1].Depth);
@@ -262,7 +265,10 @@
 			Assert.AreEqual(firstFrameList[1].Altitude, secondFrameList[1].Altitude);
 			Assert.AreEqual(firstFrameList[1].Heading, secondFrameList[1].Heading);
 			//Assert.AreEqual(firstFrameList[1].Flags, secondFrameList[1].Flags);
-			Assert.AreEqual(firstFrameList[1].SoundedData, secondFrameList[1].SoundedData);
+			Assert.AreEqual(firstFrameList[1].SoundedData.Data, secondFrameList[1].SoundedData.Data);
+			Assert.AreEqual(firstFrameList[1].SoundedData.ChannelType, secondFrameList[1].SoundedData.ChannelType);
+			Assert.AreEqual(firstFrameList[1].SoundedData.LowerLimit, secondFrameList[1].SoundedData.LowerLimit);
+			Assert.AreEqual(firstFrameList[1].SoundedData.UpperLimit, secondFrameList[1].SoundedData.UpperLimit);
 		}
 	}
 }

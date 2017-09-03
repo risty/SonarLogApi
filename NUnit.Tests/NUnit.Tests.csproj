@@ -38,12 +38,17 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleLogConverterTests.cs" />
     <Compile Include="CVSTests.cs" />
     <Compile Include="LowranceTests.cs" />
     <Compile Include="PrimitivesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConsoleLogConverter\ConsoleLogConverter.csproj">
+      <Project>{7f08d594-ad69-4606-b784-d55faf45079e}</Project>
+      <Name>ConsoleLogConverter</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SonarLogAPI\SonarLogAPI.csproj">
       <Project>{a7ef68a0-7a8d-404e-b3fe-4eabcfb26293}</Project>
       <Name>SonarLogAPI</Name>
