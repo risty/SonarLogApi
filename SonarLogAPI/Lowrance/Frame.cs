@@ -156,7 +156,7 @@
 	{
 		//Properties based on http://wiki.openstreetmap.org/wiki/SL2
 
-		private const double _polarEarthRadius = 6356752.3142d;
+		private const double _polarEarthRadius = 6356752.31424518d;
 		private const double _radConversion = 180d / Math.PI;
 
 		#region Frame Properties
