@@ -64,16 +64,16 @@
 				 HelpText = "Generate frames for specific channel from the frames at other channel(s). Format: numbers and chars, " +
 							"separated by colon. " +
 							"Options: numbers - destionation frame channel and source channel(s); " +
-				            "d - if specified generate sounded data from source frame depth value,(otherwise take sounded " +
+							"d - if specified generate sounded data from source frame depth value,(otherwise take sounded " +
 							"data from source frame); f - if specified generate frame in destination channel even if frame with " +
-				            "such coordinates already exist." +
-				            "Examples: \"-g 0:2:\" - find in the 2th channel(DownScan) frames with coordinates " +
+							"such coordinates already exist." +
+							"Examples: \"-g 0:2:\" - find in the 2th channel(DownScan) frames with coordinates " +
 							"that are absent in the 0th channel(Primary) and generate frames with such coordinates in the 0th " +
 							"channel. \"-g 1:2:5:f\" - get frames from 2th(DownScan) and 5th (SidescanComposite) channels and " +
 							"group em by unique coordinates. After that generate 1th(Secondary) channel frames (even frames with " +
 							"coordinates from 2th and 5th chanel are in 1th(\"f\" option)). \"-g 0:5:d\" - get frames from 5th " +
-				            "(SidescanComposite) channel and generate frames (with generatend by depth(\"d\" option) SoundedData) for 0th(Primary) " +
-				            "channel if they are not allready exist.")]
+							"(SidescanComposite) channel and generate frames (with generatend by depth(\"d\" option) SoundedData) for 0th(Primary) " +
+							"channel if they are not allready exist.")]
 			public IList<string> GenegateParams { get; set; }
 
 			[HelpOption]
@@ -175,7 +175,6 @@
 				Console.WriteLine("Can't parse Depth Shift. Full error message:\"{0}\"", e);
 			}
 
-
 			return !double.IsNaN(value);
 		}
 
@@ -184,6 +183,7 @@
 			var options = new Options();
 			if (Parser.Default.ParseArguments(args, options))
 			{
+
 				//make console window widther
 				Console.WindowWidth = 120;
 
@@ -324,7 +324,7 @@
 						//erase dstChannel frames from data
 						if (forceGenerate)
 						{
-							erasedPointsCountAtDstChannel = data.Frames.RemoveAll(frame => frame.ChannelType == dstChannel.FirstOrDefault());		
+							erasedPointsCountAtDstChannel = data.Frames.RemoveAll(frame => frame.ChannelType == dstChannel.FirstOrDefault());
 						}
 
 						//get points for existed dst channel frames
@@ -346,7 +346,7 @@
 							Console.WriteLine("Unique points at source channel(s):{0}", unicueFrameFromSourceChanels.Count);
 							if (forceGenerate)
 								Console.WriteLine("Points erased at destination channel:{0}", erasedPointsCountAtDstChannel);
-							Console.WriteLine("Points added to destination channel:{0}", unicueFrameFromSourceChanels.Count- dstChannelFramesPoints.Count);
+							Console.WriteLine("Points added to destination channel:{0}", unicueFrameFromSourceChanels.Count - dstChannelFramesPoints.Count);
 						}
 					}
 				}
@@ -436,17 +436,24 @@
 					//delete coordinates if it necessary
 					if (options.CoordinatesDelete)
 					{
-						Console.WriteLine("Deleting coordinate points...\n");
+						Console.WriteLine("Anonymize coordinate points...\n");
 						stopWatch.Start();
+
+						//move track to random place
+						var rnd = new Random();
+						double lat = rnd.Next(-90, 90);
+						double lon = rnd.Next(-180, 180);
 						Func<Frame, Frame> coordinatesDelete = frame =>
 						{
-							frame.Point = new CoordinatePoint(0, 0);
+							frame.Point = new CoordinatePoint(Latitude.FromDegrees(frame.Point.Latitude.ToDegrees() % 1 + lat),
+								Longitude.FromDegrees(frame.Point.Longitude.ToDegrees() % 1 + lon));
+
 							return frame;
 						};
 
 						newFrames = newFrames.Select(coordinatesDelete).ToList();
 						stopWatch.Stop();
-						Console.WriteLine("Points deleted.  Delete time: " + stopWatch.Elapsed + "\n");
+						Console.WriteLine("Anonymizations time: " + stopWatch.Elapsed + "\n");
 						stopWatch.Reset();
 					}
 
