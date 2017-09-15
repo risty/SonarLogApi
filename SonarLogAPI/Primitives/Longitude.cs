@@ -65,7 +65,7 @@
 		/// <param name="position">Longitude position</param>
 		/// <returns>Degrees double value</returns>
 
-		public static double ToDouble(double degrees, double minutes, double seconds, LongitudePosition position)
+		public static double ToDegrees(double degrees, double minutes, double seconds, LongitudePosition position)
 		{
 			var toDouble = Math.Abs(degrees) + minutes / 60 + seconds / 3600;
 			return position == LongitudePosition.East
@@ -77,11 +77,31 @@
 		/// Returns <see cref="Longitude" /> coordinate, converted to Degrees double value
 		/// </summary>
 		/// <returns>Degrees double value</returns>
-		public override double ToDouble()
+		public override double ToDegrees()
 		{
 			return Position == LongitudePosition.East
-				? base.ToDouble()
-				: base.ToDouble() * -1;
+				? base.ToDegrees()
+				: base.ToDegrees() * -1;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Longitude"/> class from degrees value.
+		/// </summary>
+		/// <param name="degreesValue">Degrees value.</param>
+		/// <returns>Instance of the <see cref="Longitude"/></returns>
+		public static Longitude FromDegrees(double degreesValue)
+		{
+			return new Longitude(degreesValue);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Longitude"/> class from radians value.
+		/// </summary>
+		/// <param name="radiansValue">Radians value.</param>
+		/// <returns>Instance of the <see cref="Longitude"/></returns>
+		public static Longitude FromRadians(double radiansValue)
+		{
+			return new Longitude(radiansValue * 180d / Math.PI);
 		}
 
 		/// <summary>
@@ -121,7 +141,7 @@
 
 		public override int GetHashCode()
 		{
-			return ToDouble().GetHashCode();
+			return ToDegrees().GetHashCode();
 		}
 
 		private void PositionSet(double degrees)

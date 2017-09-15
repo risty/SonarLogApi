@@ -74,7 +74,7 @@
 			   {
 				   foreach (var uniqueAdjustablePoint in uniqueAdjustablePoints)
 				   {
-					   var dim = CoordinatePoint.DistanceBetweenPoints(uniqueBasePoint.Point, uniqueAdjustablePoint.Point);
+					   var dim = CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(uniqueBasePoint.Point, uniqueAdjustablePoint.Point);
 					   if (dim < distance)
 					   {
 						   lock (_syncRoot)

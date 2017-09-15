@@ -154,13 +154,13 @@
 	/// </summary>
 	public class Frame : IDepthPointSource, ITemperaturePointSource, IComparable<Frame>
 	{
-		//Properties based on http://wiki.openstreetmap.org/wiki/SL2
-
-		private const double _polarEarthRadius = 6356752.31424518d;
+		private const double _earthWGS84PolarRadius = 6356752.31424518d;
 		private const double _radConversion = 180d / Math.PI;
 
-		#region Frame Properties
+		#region Frame properties
 
+		//Properties based on http://wiki.openstreetmap.org/wiki/SL2
+		
 		/// <summary>
 		/// Type of channel
 		/// </summary>
@@ -175,16 +175,6 @@
 		/// Starts at 0. Used ot match frames/block on different channels.
 		/// </summary>
 		public int FrameIndex { get; set; }
-
-		///// <summary>
-		///// Upper limit of <see cref="SoundedData" />
-		///// </summary>
-		//public LinearDimension UpperLimit { get; set; }
-
-		///// <summary>
-		///// Lower limit of <see cref="SoundedData" />
-		///// </summary>
-		//public LinearDimension LowerLimit { get; set; }
 
 		/// <summary>
 		/// Sonar Frequency
@@ -224,7 +214,7 @@
 		public float WaterSpeed { get; set; }
 
 		/// <summary>
-		/// Track/Course-Over-Ground in radians. Taken from GPS NMEA data. 
+		/// Track/Course-Over-Ground in radians. Real direction of boat movement. Taken from GPS NMEA data. 
 		/// </summary>
 		public float CourseOverGround { get; set; }
 
@@ -234,7 +224,7 @@
 		public LinearDimension Altitude { get; set; }
 
 		/// <summary>
-		/// Heading in radians. Taken from GPS NMEA data. 
+		/// Heading in radians. Angle in radians between magnetic north and transducer.
 		/// </summary>
 		public float Heading { get; set; }
 
@@ -623,8 +613,8 @@
 				writer.Write(new byte());
 				writer.Write(frame.SpeedGps * 1.94385f);
 				writer.Write(frame.Temperature);
-				writer.Write(ConvertLongitudeToLowranceInt(frame.Point.Longitude.ToDouble()));
-				writer.Write(ConvertLatitudeToLowranceInt(frame.Point.Latitude.ToDouble()));
+				writer.Write(ConvertLongitudeToLowranceInt(frame.Point.Longitude.ToDegrees()));
+				writer.Write(ConvertLatitudeToLowranceInt(frame.Point.Latitude.ToDegrees()));
 				//write zero in 4 bytes (offset 100 to 104)
 				writer.Write(new int());
 				writer.Write(frame.CourseOverGround);
@@ -776,8 +766,8 @@
 				writer.Write(new int());
 				writer.Write(frame.SpeedGps * 1.94385f);
 				writer.Write(frame.Temperature);
-				writer.Write(ConvertLongitudeToLowranceInt(frame.Point.Longitude.ToDouble()));
-				writer.Write(ConvertLatitudeToLowranceInt(frame.Point.Latitude.ToDouble()));
+				writer.Write(ConvertLongitudeToLowranceInt(frame.Point.Longitude.ToDegrees()));
+				writer.Write(ConvertLatitudeToLowranceInt(frame.Point.Latitude.ToDegrees()));
 				writer.Write(frame.WaterSpeed * 1.94385f);
 				writer.Write(frame.CourseOverGround);
 				writer.Write((float)frame.Altitude.GetFoots());
@@ -878,7 +868,7 @@
 		/// <returns>Longitude int value in Lowrance format</returns>
 		private static int ConvertLongitudeToLowranceInt(double longitudeWGS84)
 		{
-			return Convert.ToInt32(longitudeWGS84 * _polarEarthRadius / _radConversion);
+			return Convert.ToInt32(longitudeWGS84 * _earthWGS84PolarRadius / _radConversion);
 		}
 
 		/// <summary>
@@ -888,7 +878,7 @@
 		/// <returns>Double degrees value in WGS84 format</returns>
 		private static double ConvertLongitudeToWGS84(int lowranceIntValue)
 		{
-			return lowranceIntValue / _polarEarthRadius * _radConversion;
+			return lowranceIntValue / _earthWGS84PolarRadius * _radConversion;
 		}
 
 		/// <summary>
@@ -900,12 +890,12 @@
 		{
 			var temp = latitudeWGS84 / _radConversion;
 			temp = Math.Log(Math.Tan(temp / 2 + Math.PI / 4));
-			return Convert.ToInt32(temp * _polarEarthRadius);
+			return Convert.ToInt32(temp * _earthWGS84PolarRadius);
 		}
 
 		private static double ConvertLatitudeWGS84(int lowranceIntValue)
 		{
-			var temp = lowranceIntValue / _polarEarthRadius;
+			var temp = lowranceIntValue / _earthWGS84PolarRadius;
 			temp = Math.Exp(temp);
 			temp = 2 * Math.Atan(temp) - Math.PI / 2;
 			return temp * _radConversion;
@@ -1221,7 +1211,6 @@
 			}
 			return frame;
 		}
-
 
 		public override string ToString()
 		{

@@ -117,10 +117,19 @@ namespace SonarLogAPI.Primitives
 		/// <summary>
 		/// Represent coordinate as degrees double value.
 		/// </summary>
-		/// <returns>Degrees double value</returns>
-		public virtual double ToDouble()
+		/// <returns>Degrees double value.</returns>
+		public virtual double ToDegrees()
 		{
 			return Degrees + Minutes / 60 + Seconds / 3600;
+		}
+
+		/// <summary>
+		/// Represent coordinate as radians double value.
+		/// </summary>
+		/// <returns>Radians double value.</returns>
+		public double ToRadians()
+		{
+			return ToDegrees() * Math.PI / 180d;
 		}
 
 		public bool Equals(Coordinate other)
@@ -139,13 +148,12 @@ namespace SonarLogAPI.Primitives
 		public override bool Equals(object obj)
 		{
 			var item = obj as Coordinate;
-
 			return item != null && Equals(item);
 		}
 
 		public override int GetHashCode()
 		{
-			return ToDouble().GetHashCode();
+			return ToDegrees().GetHashCode();
 		}
 
 		public override string ToString()

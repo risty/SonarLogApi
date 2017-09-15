@@ -1,7 +1,6 @@
 ﻿namespace SonarLogAPI.Primitives
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Globalization;
 
 	//can be replased to GeoCoordinate if nesesary https://msdn.microsoft.com/en-us/library/system.device.location.geocoordinate(v=vs.110).aspx
@@ -13,8 +12,13 @@
 	public class CoordinatePoint : IEquatable<CoordinatePoint>
 	{
 
-		//https://en.wikipedia.org/wiki/World_Geodetic_System
-		private const double _equatorialEarthRadius = 6378137.0D; //meters
+		//https://en.wikipedia.org/wiki/Earth_radius#Mean_radius
+		private const double _earthWgs84MeanRadius = 6371008.8D; //meters
+
+		//https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
+		private const double _earthWgs84EquatorialRadius = 6378137.0D; //The Earth's equatorial radius "a" in meters.
+		private const double _earthWgs84PolarRadius = 6356752.31424518d; // The Earth's polar radius "b" in meters.
+
 		private const double _d2R = Math.PI / 180D;
 
 		/// <summary>
@@ -116,42 +120,215 @@
 		{
 			return (Latitude?.GetHashCode() ?? 0) ^ (Longitude?.GetHashCode() ?? 0);
 		}
+		public override string ToString()
+		{
+			return string.Format(CultureInfo.InvariantCulture, "{0},{1}", Latitude.ToDegrees(), Longitude.ToDegrees());
+		}
+
+		#region Direct and inverse problem on the flat
 
 		/// <summary>
-		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" />.
+		/// Get <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at distance and direction on the flat.
 		/// </summary>
-		/// <param name="firstPoint">First point</param>
-		/// <param name="secondPoint">Second point</param>
-		/// <returns><see cref="LinearDimension"/></returns>
-		public static LinearDimension DistanceBetweenPoints(CoordinatePoint firstPoint, CoordinatePoint secondPoint)
+		/// <param name="basePoint">Source <see cref="SonarLogAPI.Primitives.CoordinatePoint" /></param>
+		/// <param name="distance">Distance to a new point.</param>
+		/// <param name="azimuth">Direction from one point to another in radians.</param>
+		/// <returns><see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at specified distance and direction from the given point.</returns>
+		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionOnTheFlat(CoordinatePoint basePoint, LinearDimension distance, double azimuth)
 		{
-			return DistanceBetweenPoints(firstPoint.Latitude.ToDouble(),
-				firstPoint.Longitude.ToDouble(), secondPoint.Latitude.ToDouble(), secondPoint.Longitude.ToDouble());
+			var deltaLatitudeGrad = distance.GetMeters() * Math.Cos(azimuth) / (_earthWgs84MeanRadius * _d2R);
+			var deltaLongitudeGrad = distance.GetMeters() * Math.Sin(azimuth) / (_earthWgs84MeanRadius * _d2R);
+
+			return new CoordinatePoint(basePoint.Latitude.ToDegrees() + deltaLatitudeGrad, basePoint.Longitude.ToDegrees() + deltaLongitudeGrad);
 		}
 
 		/// <summary>
-		/// Returns the distance in meters between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" />.
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on the flat.
 		/// </summary>
 		/// <param name="lat1">First point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
 		/// <param name="long1">First point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
 		/// <param name="lat2">Second point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
 		/// <param name="long2">Second point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
-		/// <returns><see cref="LinearDimension"/></returns>
-		/// <seealso cref="http://stackoverflow.com/a/7595937/5888216"/>
-		public static LinearDimension DistanceBetweenPoints(double lat1, double long1, double lat2, double long2)
+		/// <param name="altitude">Point altitude above surface(meters). Zero by default.</param>
+		/// <returns>Distance between points</returns>	
+		public static LinearDimension GetDistanceBetweenPointsOnTheFlat(double lat1, double long1, double lat2, double long2, double altitude = 0)
 		{
-			double dlong = (long2 - long1) * _d2R;
-			double dlat = (lat2 - lat1) * _d2R;
-			double a = Math.Pow(Math.Sin(dlat / 2D), 2D) + Math.Cos(lat1 * _d2R) * Math.Cos(lat2 * _d2R) * Math.Pow(Math.Sin(dlong / 2D), 2D);
-			double c = 2D * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1D - a));
-			double d = _equatorialEarthRadius * c;
+			double deltaLatRad = (lat2 - lat1) * _d2R;
+			double deltaLonRad = (long2 - long1) * _d2R;
+			double deltaY = deltaLatRad * (_earthWgs84MeanRadius + altitude);
+			double deltaX = deltaLonRad * (_earthWgs84MeanRadius + altitude);
 
-			return new LinearDimension(d,LinearDimensionUnit.Meter);
+			double distanceMeters = Math.Sqrt(Math.Pow(deltaX, 2d) + Math.Pow(deltaY, 2d));
+			return LinearDimension.FromMeters(distanceMeters);
 		}
 
-		public override string ToString()
+		/// <summary>
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on the flat.
+		/// </summary>
+		/// <param name="firstPoint">First point</param>
+		/// <param name="secondPoint">Second point</param>
+		/// <param name="altitude">Point altitude above surface. Zero by default.</param>
+		/// <returns>Distance between points.</returns>	
+		public static LinearDimension GetDistanceBetweenPointsOnTheFlat(CoordinatePoint firstPoint, CoordinatePoint secondPoint, double altitude = 0)
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0},{1}", Latitude.ToDouble(), Longitude.ToDouble());
+			return GetDistanceBetweenPointsOnTheFlat(firstPoint.Latitude.ToDegrees(),
+					firstPoint.Longitude.ToDegrees(), secondPoint.Latitude.ToDegrees(), secondPoint.Longitude.ToDegrees());
 		}
+
+		#endregion
+
+		#region Get distance (inverse problem) at sphere with Haversine 
+
+		/// <summary>
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at sphere with WGS84 Mean Radius with Haversine formula.
+		/// </summary>
+		/// <param name="firstPoint">First point</param>
+		/// <param name="secondPoint">Second point</param>
+		/// <param name="altitude">Point altitude above surface. Zero by default.</param>
+		/// <returns>Distance between points.</returns>
+		/// <seealso cref="http://en.wikipedia.org/wiki/Great-circle_distance"/>
+		public static LinearDimension GetDistanceBetweenPointsWithHaversine(CoordinatePoint firstPoint, CoordinatePoint secondPoint, double altitude = 0)
+		{
+			return GetDistanceBetweenPointsWithHaversine(firstPoint.Latitude.ToDegrees(),
+				firstPoint.Longitude.ToDegrees(), secondPoint.Latitude.ToDegrees(), secondPoint.Longitude.ToDegrees(), altitude);
+		}
+
+		/// <summary>
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at sphere with WGS84 Mean Radius with Haversine formula.
+		/// </summary>
+		/// <param name="lat1">First point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long1">First point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="lat2">Second point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long2">Second point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="altitude">Point altitude above surface(meters). Zero by default.</param>
+		/// <returns>Distance between points</returns>
+		/// <seealso cref="http://en.wikipedia.org/wiki/Great-circle_distance"/>
+		public static LinearDimension GetDistanceBetweenPointsWithHaversine(double lat1, double long1, double lat2, double long2, double altitude = 0)
+		{
+			//with antipod points modification 
+			//https://wikimedia.org/api/rest_v1/media/math/render/svg/c3159d773b79d31c3f5ff176a6262fabd20cdbc9
+			//converts all degrees to radians
+			double lat1Rad = lat1 * _d2R;
+			double lat2Rad = lat2 * _d2R;
+			double longDeltaRad = (long2 - long1) * _d2R;
+
+			double y = Math.Sqrt(Math.Pow(Math.Cos(lat2Rad) * Math.Sin(longDeltaRad), 2d) + Math.Pow(Math.Cos(lat1Rad) * Math.Sin(lat2Rad) - Math.Sin(lat1Rad) * Math.Cos(lat2Rad) * Math.Cos(longDeltaRad), 2d));
+			double x = Math.Sin(lat1Rad) * Math.Sin(lat2Rad) + Math.Cos(lat1Rad) * Math.Cos(lat2Rad) * Math.Cos(longDeltaRad);
+			double deltaSigma = Math.Atan2(y, x);
+
+			return LinearDimension.FromMeters(deltaSigma * (_earthWgs84MeanRadius + altitude));
+		}
+
+		#endregion
+
+		#region Direct and inverse problems on an ellipsoid
+
+		/// <summary>
+		/// Get <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at distance and direction on an ellipsoid.
+		/// </summary>
+		/// <param name="basePoint">Source <see cref="SonarLogAPI.Primitives.CoordinatePoint" /></param>
+		/// <param name="distance">Distance to a new point.</param>
+		/// <param name="azimuth">Azimuth to a new point.</param>
+		/// <param name="backAzimuth">Azimuth from a new point to base point.</param>
+		/// <returns><see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at specified distance and direction from the base point.</returns>
+		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(CoordinatePoint basePoint, LinearDimension distance, double azimuth, out double backAzimuth)
+		{
+			double deltaLatitude;
+			double deltaLongitude;
+			double deltaAzimuth;
+			double newDeltaLatitude = 0;
+			double newDeltaLongitude = 0;
+			double newDeltaAzimuth = 0;
+
+			do
+			{
+				deltaLatitude = newDeltaLatitude;
+				deltaLongitude = newDeltaLongitude;
+				deltaAzimuth = newDeltaAzimuth;
+
+				double iterationLatitude = basePoint.Latitude.ToRadians() + deltaLatitude / 2;
+				double iterationAzimuth = azimuth + deltaAzimuth / 2;
+
+				double beta = distance.GetMeters() * Math.Cos(iterationAzimuth) / GetMeridionalForLatitude(Latitude.FromRadians(iterationLatitude));
+				double sigma = distance.GetMeters() * Math.Sin(iterationAzimuth) / (GetPrimeVerticalForLatitude(Latitude.FromRadians(iterationLatitude)) * Math.Cos(iterationLatitude));
+				double alpha = deltaLongitude * Math.Sin(iterationLatitude);
+
+				newDeltaLatitude = beta * (1 + (2 * Math.Pow(sigma, 2d) + Math.Pow(alpha, 2d)) / 24);
+				newDeltaLongitude = sigma * (1 + (Math.Pow(alpha, 2d) - Math.Pow(beta, 2d)) / 24);
+				newDeltaAzimuth = alpha * (1 + (3 * Math.Pow(beta, 2d) + 2 * Math.Pow(sigma, 2d) - 2 * Math.Pow(alpha, 2d)) / 24);
+			}
+			while (newDeltaLatitude - deltaLatitude > 0.0000001d || deltaLongitude - newDeltaLongitude > 0.0000001d);
+
+			backAzimuth = azimuth + newDeltaAzimuth + Math.PI;
+			return new CoordinatePoint(Latitude.FromRadians(basePoint.Latitude.ToRadians() + newDeltaLatitude),
+				Longitude.FromRadians(basePoint.Longitude.ToRadians() + newDeltaLongitude));
+		}
+
+		/// <summary>
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
+		/// </summary>
+		/// <param name="firstPoint">First point</param>
+		/// <param name="secondPoint">Second point</param>
+		/// <param name="altitude">Point altitude above surface. Zero by default.</param>
+		/// <returns>Distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid</returns>
+		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(CoordinatePoint firstPoint, CoordinatePoint secondPoint, double altitude = 0)
+		{
+			return GetDistanceBetweenPointsOnAnEllipsoid(firstPoint.Latitude.ToDegrees(),
+				firstPoint.Longitude.ToDegrees(), secondPoint.Latitude.ToDegrees(), secondPoint.Longitude.ToDegrees(), altitude);
+		}
+
+		/// <summary>
+		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
+		/// </summary>
+		/// <param name="lat1">First point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long1">First point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="lat2">Second point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long2">Second point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="altitude">Point altitude above surface(meters). Zero by default.</param>
+		/// <returns>Distance between points</returns>
+		/// <seealso cref="http://www.geogr.msu.ru/cafedra/karta/docs/GOK/gok_lecture_4.pdf"/>
+		/// <remarks>This method can return two azimuts to points.</remarks>
+		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(double lat1, double long1, double lat2, double long2, double altitude = 0)
+		{
+			//degree(pow) reduction formula
+			Func<double, double> sinPow2 = angleRadians => (1 - Math.Cos(2 * angleRadians)) / 2;
+
+			double deltaLatitudeRadians = (lat2 - lat1) * _d2R;
+			double deltaLongitudeRadians = (long2 - long1) * _d2R;
+			double middleLongitudeRadians = (lat2 + lat1) * _d2R / 2;
+			double meridional = GetMeridionalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
+			double primeVertical = GetPrimeVerticalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
+			double q = deltaLatitudeRadians * meridional * 
+				(1 - (2 * Math.Pow(deltaLongitudeRadians, 2d) + Math.Pow(deltaLongitudeRadians, 2d) * sinPow2(meridional)) / 24);
+			double p = deltaLongitudeRadians * primeVertical * Math.Cos(middleLongitudeRadians) *
+			           (1 + (Math.Pow(deltaLatitudeRadians, 2d) - Math.Pow(deltaLongitudeRadians, 2d) * sinPow2(middleLongitudeRadians)) / 24);
+
+			return LinearDimension.FromMeters(Math.Sqrt(Math.Pow(q,2d)+ Math.Pow(p, 2d)));
+		}
+
+		/// <summary>
+		/// Returns Meridional value for specified <see cref="Primitives.Latitude"/>.
+		/// </summary>
+		/// <param name="latitude"><see cref="Primitives.Latitude"/></param>
+		/// <returns>Meridional value for specified <see cref="Primitives.Latitude"/>.</returns>
+		/// <seealso cref="http://en.wikipedia.org/wiki/Earth_radius#Meridional"/>
+		private static double GetMeridionalForLatitude(Latitude latitude)
+		{
+			return Math.Pow(_earthWgs84EquatorialRadius * _earthWgs84PolarRadius, 2d)
+				/ Math.Pow(Math.Pow(_earthWgs84EquatorialRadius * Math.Cos(latitude.ToRadians()), 2d) + Math.Pow(_earthWgs84PolarRadius * Math.Sin(latitude.ToRadians()), 2d), 3d / 2d);
+		}
+
+		/// <summary>
+		/// Returns Prime vertical value for specified <see cref="Primitives.Latitude"/>.
+		/// </summary>
+		/// <param name="latitude"><see cref="Primitives.Latitude"/></param>
+		/// <returns>Prime vertical value for specified <see cref="Primitives.Latitude"/>.</returns>
+		/// <seealso cref="http://en.wikipedia.org/wiki/Earth_radius#Prime_vertical"/>
+		private static double GetPrimeVerticalForLatitude(Latitude latitude)
+		{
+			return Math.Pow(_earthWgs84EquatorialRadius, 2d)
+				/ Math.Sqrt(Math.Pow(_earthWgs84EquatorialRadius * Math.Cos(latitude.ToRadians()), 2d) + Math.Pow(_earthWgs84PolarRadius * Math.Sin(latitude.ToRadians()), 2d));
+		}
+		#endregion
 	}
 }

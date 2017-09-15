@@ -13,14 +13,14 @@ namespace NUnit.Tests
 	{
 
 		const double _extremlyHighLatitudeDouble = 96.81234123;
-		const double _northLatitudeDouble = 43.81234123;
-		const double _equatorLatitudeDouble = 0;
-		const double _southLatitudeDouble = -60.813454769;
+		const double _northLatitudeDegrees = 43.81234123;
+		const double _equatorLatitudeDegrees = 0;
+		const double _southLatitudeDegrees = -60.813454769;
 		const double _extremlyLowLatitudeDouble = -95.85472;
 
-		private Latitude northLatitude = new Latitude(_northLatitudeDouble);
-		private Latitude equatorLatitude = new Latitude(_equatorLatitudeDouble);
-		private Latitude southLatitude = new Latitude(_southLatitudeDouble);
+		private Latitude northLatitude = new Latitude(_northLatitudeDegrees);
+		private Latitude equatorLatitude = new Latitude(_equatorLatitudeDegrees);
+		private Latitude southLatitude = new Latitude(_southLatitudeDegrees);
 
 		[Test(TestOf = typeof(Latitude))]
 		public void DifferentLatitudeCreation()
@@ -48,22 +48,29 @@ namespace NUnit.Tests
 		}
 
 		[Test(TestOf = typeof(Latitude))]
-		public void LatitudeToDoubleTest()
+		public void LatitudeToDegreesTest()
 		{
+			Assert.AreEqual(_northLatitudeDegrees,
+				Latitude.ToDegrees(northLatitude.Degrees, northLatitude.Minutes, northLatitude.Seconds, northLatitude.Position));
+			Assert.AreEqual(_equatorLatitudeDegrees,
+				Latitude.ToDegrees(equatorLatitude.Degrees, equatorLatitude.Minutes, equatorLatitude.Seconds, equatorLatitude.Position));
+			Assert.AreEqual(_southLatitudeDegrees,
+				Latitude.ToDegrees(southLatitude.Degrees, southLatitude.Minutes, southLatitude.Seconds, southLatitude.Position));
 
-			Assert.AreEqual(_northLatitudeDouble,
-				Latitude.ToDouble(northLatitude.Degrees, northLatitude.Minutes, northLatitude.Seconds, northLatitude.Position));
+			Assert.AreEqual(_northLatitudeDegrees, _northLatitudeDegrees);
+			Assert.AreEqual(_equatorLatitudeDegrees, equatorLatitude.ToDegrees());
+			Assert.AreEqual(_southLatitudeDegrees, southLatitude.ToDegrees());
 
-			Assert.AreEqual(_equatorLatitudeDouble,
-				Latitude.ToDouble(equatorLatitude.Degrees, equatorLatitude.Minutes, equatorLatitude.Seconds, equatorLatitude.Position));
+		}
 
-			Assert.AreEqual(_southLatitudeDouble,
-				Latitude.ToDouble(southLatitude.Degrees, southLatitude.Minutes, southLatitude.Seconds, southLatitude.Position));
+		[Test(TestOf = typeof(Latitude))]
+		public void LatitudeToRadiansTest()
+		{
+			Assert.AreEqual(northLatitude.ToRadians(), _northLatitudeDegrees * Math.PI / 180d);
+			Assert.AreEqual(equatorLatitude.ToRadians(), _equatorLatitudeDegrees * Math.PI / 180d);
 
-			Assert.AreEqual(_northLatitudeDouble, northLatitude.ToDouble());
-			Assert.AreEqual(_equatorLatitudeDouble, equatorLatitude.ToDouble());
-			Assert.AreEqual(_southLatitudeDouble, southLatitude.ToDouble());
-
+			Assert.AreEqual(Math.Sin(11d / 6d * Math.PI), Math.Sin(-1d / 6d * Math.PI), 0.00000001d);
+			Assert.AreEqual(southLatitude.ToRadians(), _southLatitudeDegrees * Math.PI / 180d);
 		}
 
 		[Test(TestOf = typeof(Latitude))]
@@ -71,7 +78,7 @@ namespace NUnit.Tests
 		{
 			Latitude latitude;
 
-			var res = Latitude.TryParse(_northLatitudeDouble.ToString(), out latitude);
+			var res = Latitude.TryParse(_northLatitudeDegrees.ToString(), out latitude);
 			Assert.IsTrue(res);
 			Assert.IsTrue(northLatitude.Equals(latitude));
 			Assert.IsFalse(northLatitude == latitude);
@@ -158,12 +165,58 @@ namespace NUnit.Tests
 		[Test(TestOf = typeof(CoordinatePoint))]
 		public void DistanceTest()
 		{
-			var one = new CoordinatePoint(new Latitude(60, 12.698), new Longitude(32, 25.259));
 
-			var two = new CoordinatePoint(new Latitude(60, 12.730), new Longitude(32, 25.346));
+			// expected distances takes from Lowrance HDS7 Gen3
+			//seem like HDS7 Gen3 calculate distances with sphere Earth model
+			var basePoint = new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.719));
 
-			// distance takes from Lowrance Elite-5 HDI
-			Assert.AreEqual(99, CoordinatePoint.DistanceBetweenPoints(one, two).GetMeters(), 1);
+			var two = new CoordinatePoint(new Latitude(60, 12.324), new Longitude(32, 15.530));
+			Assert.AreEqual(9710, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 5);
+			Assert.AreEqual(9710, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 26);
+
+			two = new CoordinatePoint(new Latitude(57, 36.631), new Longitude(29, 44.306));
+			Assert.AreEqual(315800, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 200);
+			Assert.AreEqual(315800, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 1000);
+
+			two = new CoordinatePoint(new Latitude(51, 11.377), new Longitude(44, 14.519));
+			Assert.AreEqual(1239000, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 700);
+			Assert.AreEqual(1239000, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 5000);
+
+			two = new CoordinatePoint(new Latitude(60, 07.317), new Longitude(32, 18.822));
+			Assert.AreEqual(97.3d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 0.1d);
+			Assert.AreEqual(97.3d, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.4d);
+
+			two = new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.716));
+			Assert.AreEqual(5.1d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 0.5d);
+			Assert.AreEqual(5.1d, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.5d);
+			//too poor accuracy with flat method
+			Assert.AreEqual(5.1d, CoordinatePoint.GetDistanceBetweenPointsOnTheFlat(basePoint, two).GetMeters(), 2);
+
+			two = new CoordinatePoint(new Latitude(60, 07.374), new Longitude(32, 18.754));
+			Assert.AreEqual(90.6d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 1);
+			Assert.AreEqual(90.6d, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.8d);
+
+			two = new CoordinatePoint(new Latitude(60, 07.318), new Longitude(32, 18.734));
+			Assert.AreEqual(23.2d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 1);
+			Assert.AreEqual(23.2d, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.01d);
+
+		}
+
+		[Test(TestOf = typeof(CoordinatePoint))]
+		public void GetCoordinatePointAtDistanceAndDirectionTest()
+		{
+			var baseCoordinatePoint = new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.719));
+
+			//expected values takes from HDS Gen3
+			double backAzimuth;
+			var point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70, out backAzimuth);
+			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.722)), point1);
+
+			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71, out backAzimuth);
+			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.731)), point1);
+
+			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88, out backAzimuth);
+			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.825)), point1);
 
 		}
 
