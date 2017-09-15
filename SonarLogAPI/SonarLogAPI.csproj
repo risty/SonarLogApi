@@ -50,6 +50,7 @@
     <Compile Include="Primitives\Latitude.cs" />
     <Compile Include="Localization\ProjectDescriptions.cs" />
     <Compile Include="Lowrance\SoundedData.cs" />
+    <Compile Include="Primitives\MagVar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Lowrance\Frame.cs" />
     <Compile Include="Lowrance\Header.cs" />
