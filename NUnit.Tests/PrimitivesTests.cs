@@ -249,5 +249,46 @@ namespace NUnit.Tests
 		}
 	}
 
+	[TestFixture(Author = ProjectDescriptions.Company)]
+	public class MagneticVariationTests
+	{
+		private const double _toRadians = Math.PI / 180d;
+
+		[Test(TestOf = typeof(MagneticVariation))]
+		public void GetMagneticVariationTest()
+		{
+			var julianDay = new DateTimeOffset(2017, 09, 16, 00, 00, 00, TimeSpan.Zero);
+
+			double[] fields;
+
+			//expected values from windows gui app https://www.ngdc.noaa.gov/geomag/WMM/wmm_gdownload.shtml
+			var lat1 = 60 * _toRadians;
+			var lon1 = 30 * _toRadians;
+			var point1ExpectedDecination = 10.65 * _toRadians;
+			Assert.AreEqual(point1ExpectedDecination,
+				MagneticVariation.GetMagneticVariation(lat1, lon1, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+
+			var lat2 = -30 * _toRadians;
+			var lon2 = 130 * _toRadians;
+			var point2ExpectedDecination = 3.95 * _toRadians;
+
+			Assert.AreEqual(point2ExpectedDecination,
+				MagneticVariation.GetMagneticVariation(lat2, lon2, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+
+			var lat3 = 40 * _toRadians;
+			var lon3 = -70 * _toRadians;
+			var point3ExpectedDecination = -14.5 * _toRadians;
+
+			Assert.AreEqual(point3ExpectedDecination,
+				MagneticVariation.GetMagneticVariation(lat3, lon3, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+
+			var lat4 = -50 * _toRadians;
+			var lon4 = -170 * _toRadians;
+			var point4ExpectedDecination = 31.04 * _toRadians;
+
+			Assert.AreEqual(point4ExpectedDecination,
+				MagneticVariation.GetMagneticVariation(lat4, lon4, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+		}
+	}
 
 }
