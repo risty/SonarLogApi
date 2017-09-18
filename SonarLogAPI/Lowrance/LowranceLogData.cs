@@ -47,7 +47,6 @@
 
 			var data = new LowranceLogData
 			{
-				CreationDateTime = DateTimeOffset.Now,
 				Frames = new List<Frame>()
 			};
 
@@ -55,11 +54,17 @@
 			{
 				data.Header = Header.ReadHeader(reader, 0);
 
-				var framesMap = Frame.GetFrameMap(reader, Header.Lenght, data.Header.FileVersion);
+				DateTimeOffset fileCreationDateTime;
 
-				foreach (var offset in framesMap)
+				var framesMap = Frame.GetFramesMap(reader, Header.Lenght, data.Header.FileVersion, out fileCreationDateTime);
+
+				data.CreationDateTime = fileCreationDateTime;
+
+				foreach (var frameRecord in framesMap)
 				{
-					data.Frames.Add(Frame.ReadFrame(reader, offset, data.Header.FileVersion));
+					var frame = Frame.ReadFrame(reader, frameRecord.Item1, data.Header.FileVersion);
+					frame.DateTimeOffset = data.CreationDateTime + frameRecord.Item2;
+					data.Frames.Add(frame);
 				}
 			}
 

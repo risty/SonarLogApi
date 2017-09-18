@@ -101,7 +101,8 @@
 		{
 			if (data == null)
 				return;
-			Console.WriteLine("File Version = {0}, Hardware Version = {1}, Block Size = {2}\n", data.Header.FileVersion, data.Header.HardwareVersion, data.Header.BlockSize);
+			Console.WriteLine("File Version: {0}, Hardware Version: {1}, Block Size: {2}\n", data.Header.FileVersion, data.Header.HardwareVersion, data.Header.BlockSize);
+			Console.WriteLine("File creation time: {0}\n", data.CreationDateTime.LocalDateTime);
 
 			var tableHeader = $"|{"Channel Type",20}|{"Frequency",22}|{"First Frame №",13}|{"Last Frame №",12}|{"Frames Total",12}|";
 
@@ -126,7 +127,7 @@
 		{
 			var stopWatch = new Stopwatch();
 			if (verbose)
-				Console.WriteLine("Reads file: {0}\n", filename);
+				Console.WriteLine("Reads file: {0}", filename);
 
 			LowranceLogData data;
 			try
@@ -183,7 +184,6 @@
 			var options = new Options();
 			if (Parser.Default.ParseArguments(args, options))
 			{
-
 				//make console window widther
 				Console.WindowWidth = 120;
 

@@ -1,5 +1,6 @@
 ﻿namespace NUnit.Tests
 {
+	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
@@ -39,7 +40,7 @@
 
 			using (var writer = new BinaryWriter(toStream))
 			{
-				Header.WriteHeader(writer, firstHeader,0);
+				Header.WriteHeader(writer, firstHeader, 0);
 			}
 
 			toStream.Close();
@@ -60,7 +61,7 @@
 			Assert.AreEqual(firstHeader.HardwareVersion, secondHeader.HardwareVersion);
 			Assert.AreEqual(firstHeader.BlockSize, secondHeader.BlockSize);
 		}
-		
+
 	}
 
 	[TestFixture(Author = ProjectDescriptions.Company)]
@@ -78,10 +79,13 @@
 
 			var fromStream = new FileStream
 				(solutionDir + @"\input.sl2", FileMode.Open, FileAccess.Read);
-			
+
 			using (var reader = new BinaryReader(fromStream))
 			{
-				var map = Frame.GetFrameMap(reader, Header.Lenght, FileVersion.SL2).ToArray();
+				DateTimeOffset fileCreationTime;
+
+				var map = Frame.GetFramesMap(reader, Header.Lenght, FileVersion.SL2, out fileCreationTime)
+					.Select(tuple => tuple.Item1).ToArray();
 				firstFrameList.Add(Frame.ReadFrame(reader, map[0], FileVersion.SL2));
 				firstFrameList.Add(Frame.ReadFrame(reader, map[1], FileVersion.SL2));
 				firstFrameList.Add(Frame.ReadFrame(reader, map[2], FileVersion.SL2));
@@ -108,7 +112,10 @@
 
 			using (var reader = new BinaryReader(fromStream2))
 			{
-				var map = Frame.GetFrameMap(reader, Header.Lenght, FileVersion.SL2).ToArray();
+				DateTimeOffset fileCreationTime;
+
+				var map = Frame.GetFramesMap(reader, Header.Lenght, FileVersion.SL2, out fileCreationTime)
+					.Select(tuple => tuple.Item1).ToArray();
 				secondFrameList.Add(Frame.ReadFrame(reader, map[0], FileVersion.SL2));
 				secondFrameList.Add(Frame.ReadFrame(reader, map[1], FileVersion.SL2));
 				secondFrameList.Add(Frame.ReadFrame(reader, map[2], FileVersion.SL2));
@@ -184,7 +191,10 @@
 
 			using (var reader = new BinaryReader(fromStream))
 			{
-				var map = Frame.GetFrameMap(reader, Header.Lenght, FileVersion.SL3).ToArray();
+				DateTimeOffset fileCreationTime;
+
+				var map = Frame.GetFramesMap(reader, Header.Lenght, FileVersion.SL3, out fileCreationTime)
+					.Select(tuple => tuple.Item1).ToArray();
 				firstFrameList.Add(Frame.ReadFrame(reader, map[0], FileVersion.SL3));
 				firstFrameList.Add(Frame.ReadFrame(reader, map[1], FileVersion.SL3));
 				firstFrameList.Add(Frame.ReadFrame(reader, map[2], FileVersion.SL3));
@@ -211,7 +221,10 @@
 
 			using (var reader = new BinaryReader(fromStream2))
 			{
-				var map = Frame.GetFrameMap(reader, Header.Lenght, FileVersion.SL3).ToArray();
+				DateTimeOffset fileCreationTime;
+
+				var map = Frame.GetFramesMap(reader, Header.Lenght, FileVersion.SL3, out fileCreationTime)
+					.Select(tuple => tuple.Item1).ToArray();
 				secondFrameList.Add(Frame.ReadFrame(reader, map[0], FileVersion.SL3));
 				secondFrameList.Add(Frame.ReadFrame(reader, map[1], FileVersion.SL3));
 				secondFrameList.Add(Frame.ReadFrame(reader, map[2], FileVersion.SL3));

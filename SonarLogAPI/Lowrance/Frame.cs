@@ -81,10 +81,8 @@
 		Frequency = 50,//byte
 
 		//undefined offset 53, 1 byte
-		CreationDataTime = 60,//int, 4 bytes, value in fist frame = unix time stamp of file creation?
-							  //other frames - time from device boot?
-							  // -1 in fist frame it some device models
-							  // -1 in all frames if recorded in demo mode
+		CreationDataTime = 60,//int, 4 bytes, value in fist frame = unix time stamp of file creation.
+							  //other frames - time from device boot.
 
 		Depth = 64,//float, 4 bytes
 		KeelDepth = 68,//float, 4 bytes
@@ -126,8 +124,8 @@
 		FrameIndex = 16,//int, 4 bytes
 		UpperLimit = 20,//float, 4 bytes
 		LowerLimit = 24,//float, 4 bytes
-		CreationDataTime = 40,//int, 4 bytes, value in fist frame = unix time stamp of file creation?
-							  //other frames - time from device boot?
+		CreationDataTime = 40,//int, 4 bytes, value at fist frame = unix time stamp of file creation. if GPS cant fi[ position value will be "-1"
+							  //other frames - time in milliseconds from device boot.
 		PacketSize = 44,//short, 2 bytes
 		Depth = 48,//float, 4 bytes
 		Frequency = 52,//byte
@@ -138,7 +136,7 @@
 		CourseOverGround = 104,//float, 4 bytes
 		Altitude = 108,//float, 4 bytes
 		Heading = 112,//float, 4 bytes
-		TimeOffset = 124,//int, 4 bytes
+		TimeOffset = 124,//int, 4 bytes, time in milliseconds from log file creation.
 		LastPrimaryChannelFrameOffset = 128, //int, 4 bytes
 		LastSecondaryChannelFrameOffset = 132, //int, 4 bytes
 		LastDownScanChannelFrameOffset = 136, //int, 4 bytes
@@ -160,7 +158,7 @@
 		#region Frame properties
 
 		//Properties based on http://wiki.openstreetmap.org/wiki/SL2
-		
+
 		/// <summary>
 		/// Type of channel
 		/// </summary>
@@ -234,9 +232,9 @@
 		public List<FrameFlags> Flags { get; set; }
 
 		/// <summary>
-		/// TimeOffset from unknown moment
+		/// Frame creation time
 		/// </summary>
-		public TimeSpan TimeOffset { get; set; }
+		public DateTimeOffset DateTimeOffset { get; set; }
 
 		/// <summary>
 		/// Contains sounding/bounce data
@@ -262,11 +260,12 @@
 		/// T7 is <see cref="ChannelType"/></returns>
 		public static IDictionary<int, Tuple<byte[], short, short, int, float, int, ChannelType>> ValuesResearch(BinaryReader reader, int firstFrameFirstByteOffset, int valueByteOffset, FileVersion version)
 		{
+			DateTimeOffset filecreationtime;
 			var dictionary = new Dictionary<int, Tuple<byte[], short, short, int, float, int, ChannelType>>();
 			var slType = GetOffsetsTypeForFileVersion(version);
-			var map = GetFrameMap(reader, firstFrameFirstByteOffset, version);
+			var map = GetFramesMap(reader, firstFrameFirstByteOffset, version, out filecreationtime);
 
-			foreach (var position in map)
+			foreach (var position in map.Select(tuple => tuple.Item1))
 			{
 				// gets 4 bytes and try to represent 
 				var bytesValues = GetBytes(reader, position + valueByteOffset, 4);
@@ -330,19 +329,20 @@
 			1400,
 		};
 
-
-
 		/// <summary>
 		/// Verify SL log file and create frames map
 		/// </summary>
 		/// <param name="reader"><see cref="BinaryReader"/></param>
 		/// <param name="readPosition">Offset of first frame (in bytes) in <see cref="BinaryReader"/>'s stream </param>
 		/// <param name="version"><see cref="FileVersion"/></param>
-		/// <returns>Sequence of frames offsets</returns>
-		public static IEnumerable<int> GetFrameMap(BinaryReader reader, int readPosition, FileVersion version)//, Func<Frame, bool> validationFunc)
+		/// <param name="fileCreationTime">File creation time.</param>
+		/// <returns>Sequence(tuple) of frames offsets at reader and Timespans from logging start.</returns>
+		public static IEnumerable<Tuple<int, TimeSpan>> GetFramesMap(BinaryReader reader, int readPosition, FileVersion version, out DateTimeOffset fileCreationTime)
 		{
+			fileCreationTime = DateTimeOffset.MinValue;
+
 			var slType = GetOffsetsTypeForFileVersion(version);
-			var offsets = new List<int>();
+			var framesMap = new List<Tuple<int, TimeSpan>>();
 
 			var thisTypeFrameSizeOffset = GetOffset(slType, "ThisFrameSize");
 
@@ -352,7 +352,7 @@
 
 			//size of first frame less then "ThisFrameSize" value position then return empty IEnumerable<int>
 			if (readPosition + thisTypeFrameSizeOffset > reader.BaseStream.Length)
-				return offsets;
+				return framesMap;
 
 			//else gets frame size
 			var thisFrameSize = GetShort(reader, readPosition + thisTypeFrameSizeOffset);
@@ -366,8 +366,17 @@
 				//if frame is at his place then frame is valid by default
 				if (frameOffset == readPosition)
 				{
-					//adds offset to List
-					offsets.Add(readPosition);
+					//get file creation time from this frame
+					var creationDataTimeInt = GetInt(reader, readPosition + GetOffset(slType, "CreationDataTime"));
+					var creationDataTimeOffset = DateTimeOffset.FromUnixTimeSeconds(creationDataTimeInt);
+					//if time from frame later thet previous values thet takes them
+					if (creationDataTimeOffset > fileCreationTime)
+						fileCreationTime = creationDataTimeOffset;
+
+					//get time offset in milliseconds
+					var offset = GetInt(reader, readPosition + GetOffset(slType, "TimeOffset"));
+					//adds offsets to List
+					framesMap.Add(new Tuple<int, TimeSpan>(readPosition, TimeSpan.FromMilliseconds(offset)));
 					//and move readPosition to next frame first byte
 					readPosition += thisFrameSize;
 
@@ -382,18 +391,28 @@
 
 				//if size BaseStream less then  readPosition + "ThisFrameSize"value offset then return current IEnumerable<int>
 				if (readPosition + thisTypeFrameSizeOffset > reader.BaseStream.Length)
-					return offsets;
+					return framesMap;
 				thisFrameSize = GetShort(reader, readPosition + thisTypeFrameSizeOffset);
 
 				if (readPosition + thisFrameSize + GetOffset(slType, "PreviousFrameSize") > reader.BaseStream.Length)
-					return offsets;
+					return framesMap;
 				var thisFrameSizeFromNextFrame = GetShort(reader, readPosition + thisFrameSize + GetOffset(slType, "PreviousFrameSize"));
 
 				//checks value of frame size from current and next frame. if it's equal then add first frame offset to list
 				if (thisFrameSize == thisFrameSizeFromNextFrame)
 				{
-					//adds offset to List
-					offsets.Add(readPosition);
+					//get file creation time from this frame
+					var creationDataTimeInt = GetInt(reader, readPosition + GetOffset(slType, "CreationDataTime"));
+					var creationDataTimeOffset = DateTimeOffset.FromUnixTimeSeconds(creationDataTimeInt);
+					//if time from frame later thet previous values thet takes them
+					if (creationDataTimeOffset > fileCreationTime)
+						fileCreationTime = creationDataTimeOffset;
+
+					//get time offset in milliseconds
+					var offset = GetInt(reader, readPosition + GetOffset(slType, "TimeOffset"));
+					//adds offsets to List
+					framesMap.Add(new Tuple<int, TimeSpan>(readPosition, TimeSpan.FromMilliseconds(offset)));
+
 					//and move readPosition to next frame first byte
 					readPosition += thisFrameSize;
 
@@ -442,7 +461,7 @@
 
 			}
 
-			return offsets;
+			return framesMap;
 		}
 
 		/// <summary>
@@ -525,7 +544,7 @@
 				if (IsBitSet(flagsBytes[1], 7))
 					frame.Flags.Add(FrameFlags.HeadingValid);
 			}
-			frame.TimeOffset = TimeSpan.FromMilliseconds(GetInt(reader, frameStartByteOffset + GetOffset(slType, "TimeOffset")));
+
 			var bytesForSoundedData = GetBytes(reader, frameStartByteOffset + GetOffset(slType, "SoundedData"), frame.PacketSize);
 			frame.SoundedData = new SoundedData(bytesForSoundedData, frame.ChannelType, upperLimit, lowerLimit);
 
@@ -570,7 +589,7 @@
 			int lastSidescanCompositeChannelFrameOffset = 0;
 			int lastThreeDChannelFrameOffset = 0;
 
-			int timeOffsetMiliseconds = 1;
+			int timeOffsetMiliseconds = 0;
 
 			short previousFrameSize = 0;
 
@@ -595,9 +614,15 @@
 				writer.Write(frame.FrameIndex);
 				writer.Write((float)frame.SoundedData.UpperLimit.GetFoots());
 				writer.Write((float)frame.SoundedData.LowerLimit.GetFoots());
-				//write zero in 16 bytes (offset 28 to 44)
+				//write zero in 16 bytes (offset 28 to 40)
 				writer.Write(new long());
-				writer.Write(new long());
+				writer.Write(new int());
+
+				//if it first frame then write creation time = DateTimeOffset.Now
+				//else zero
+				if (frameOffset == framesSetStartByteOffset)
+					writer.Write((int)DateTimeOffset.Now.ToUnixTimeSeconds());
+				else writer.Write(new int());
 
 				writer.Write(frame.PacketSize);
 				//write zero in 2 bytes (offset 46 to 48)
@@ -687,7 +712,7 @@
 			int lastSidescanRightChannelFrameOffset = 0;
 			int lastSidescanCompositeChannelFrameOffset = 0;
 
-			int timeOffsetMiliseconds = 1;
+			int timeOffsetMiliseconds = 0;
 
 			short previousFrameSize = 0;
 
@@ -749,15 +774,21 @@
 				writer.Write((byte)frame.Frequency);
 				//write zero in 13 bytes (offset 51)
 				writer.Write(new long());
-				writer.Write(new int());
 				writer.Write(new byte());
+
+				//if it first frame then write creation time = DateTimeOffset.Now
+				//else zero
+				if (frameOffset == framesSetStartByteOffset)
+					writer.Write((int)DateTimeOffset.Now.ToUnixTimeSeconds());
+				else
+					writer.Write(new int());
+
 				writer.Write((float)frame.Depth.GetFoots());
 
 				if (frame.KeelDepth != null)
 					writer.Write((float)frame.KeelDepth.GetFoots());
 				else
 					writer.Write((float)0);
-
 
 				//write zeros in 28 bytes (from offset 72 to 100)
 				writer.Write(new long());
@@ -991,7 +1022,7 @@
 				KeelDepth = sourceFrame.KeelDepth,
 				Point = sourceFrame.Point,
 				Temperature = sourceFrame.Temperature,
-				TimeOffset = sourceFrame.TimeOffset,
+				DateTimeOffset = sourceFrame.DateTimeOffset,
 				WaterSpeed = sourceFrame.WaterSpeed,
 
 			};
@@ -1230,3 +1261,11 @@
 		}
 	}
 }
+/*
+ * pitch:
+ * + right side turn
+ * - left side turn
+ * roll:
+ * + front side turn 
+ * - back side turn 
+*/
