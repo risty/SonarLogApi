@@ -101,8 +101,8 @@
 		{
 			if (data == null)
 				return;
-			Console.WriteLine("File Version: {0}, Hardware Version: {1}, Block Size: {2}\n", data.Header.FileVersion, data.Header.HardwareVersion, data.Header.BlockSize);
-			Console.WriteLine("File creation time: {0}\n", data.CreationDateTime.LocalDateTime);
+			Console.WriteLine("File Version: {0}, Hardware Version: {1}, Block Size: {2}", data.Header.FileVersion, data.Header.HardwareVersion, data.Header.BlockSize);
+			Console.WriteLine("File creation time: {0:dd.MM.yyyy HH:mm:ss zzz}\n", data.CreationDateTime);
 
 			var tableHeader = $"|{"Channel Type",20}|{"Frequency",22}|{"First Frame №",13}|{"Last Frame №",12}|{"Frames Total",12}|";
 
