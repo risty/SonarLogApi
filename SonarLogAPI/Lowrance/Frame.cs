@@ -136,6 +136,7 @@
 		CourseOverGround = 104,//float, 4 bytes
 		Altitude = 108,//float, 4 bytes
 		Heading = 112,//float, 4 bytes
+		Flags = 116, // two bytes
 		TimeOffset = 124,//int, 4 bytes, time in milliseconds from log file creation.
 		LastPrimaryChannelFrameOffset = 128, //int, 4 bytes
 		LastSecondaryChannelFrameOffset = 132, //int, 4 bytes
@@ -523,27 +524,25 @@
 			frame.Altitude = new LinearDimension(GetFloat(reader, frameStartByteOffset + GetOffset(slType, "Altitude")), LinearDimensionUnit.Foot);
 			frame.Heading = GetFloat(reader, frameStartByteOffset + GetOffset(slType, "Heading"));
 
-			if (version != FileVersion.SL3)
-			{
-				//read two bytes and parse flags
-				var flagsBytes = GetBytes(reader, frameStartByteOffset + (byte)Sl2FramePropertiesOffsets.Flags, 2);
+			//read two bytes and parse flags
+			var flagsBytes = GetBytes(reader, frameStartByteOffset + GetOffset(slType, "Flags"), 2);
 
-				frame.Flags = new List<FrameFlags>();
-				if (IsBitSet(flagsBytes[0], 0))
-					frame.Flags.Add(FrameFlags.TrackValid);
-				if (IsBitSet(flagsBytes[0], 1))
-					frame.Flags.Add(FrameFlags.WaterSpeedValid);
-				if (IsBitSet(flagsBytes[0], 3))
-					frame.Flags.Add(FrameFlags.PositionValid);
-				if (IsBitSet(flagsBytes[0], 5))
-					frame.Flags.Add(FrameFlags.WaterTempValid);
-				if (IsBitSet(flagsBytes[0], 6))
-					frame.Flags.Add(FrameFlags.SpeedValid);
-				if (IsBitSet(flagsBytes[1], 6))
-					frame.Flags.Add(FrameFlags.AltitudeValid);
-				if (IsBitSet(flagsBytes[1], 7))
-					frame.Flags.Add(FrameFlags.HeadingValid);
-			}
+			frame.Flags = new List<FrameFlags>();
+			if (IsBitSet(flagsBytes[0], 0))
+				frame.Flags.Add(FrameFlags.TrackValid);
+			if (IsBitSet(flagsBytes[0], 1))
+				frame.Flags.Add(FrameFlags.WaterSpeedValid);
+			if (IsBitSet(flagsBytes[0], 3))
+				frame.Flags.Add(FrameFlags.PositionValid);
+			if (IsBitSet(flagsBytes[0], 5))
+				frame.Flags.Add(FrameFlags.WaterTempValid);
+			if (IsBitSet(flagsBytes[0], 6))
+				frame.Flags.Add(FrameFlags.SpeedValid);
+			if (IsBitSet(flagsBytes[1], 6))
+				frame.Flags.Add(FrameFlags.AltitudeValid);
+			if (IsBitSet(flagsBytes[1], 7))
+				frame.Flags.Add(FrameFlags.HeadingValid);
+
 
 			var bytesForSoundedData = GetBytes(reader, frameStartByteOffset + GetOffset(slType, "SoundedData"), frame.PacketSize);
 			frame.SoundedData = new SoundedData(bytesForSoundedData, frame.ChannelType, upperLimit, lowerLimit);
@@ -645,8 +644,47 @@
 				writer.Write(frame.CourseOverGround);
 				writer.Write((float)frame.Altitude.GetFoots());
 				writer.Write(frame.Heading);
-				//write zero in 8 bytes (offset 116 to 124)
-				writer.Write(new long());
+				//write flags
+				var twoFlagsBytes = new byte[2];
+				//sets bits in two bytes
+				if (frame.Flags != null)
+				{
+					foreach (var frameFlag in frame.Flags)
+					{
+						switch (frameFlag)
+						{
+							case FrameFlags.TrackValid:
+								SetBitInByte(ref twoFlagsBytes[0], 0);
+								break;
+							case FrameFlags.WaterSpeedValid:
+								SetBitInByte(ref twoFlagsBytes[0], 1);
+								break;
+							case FrameFlags.PositionValid:
+								SetBitInByte(ref twoFlagsBytes[0], 3);
+								break;
+							case FrameFlags.WaterTempValid:
+								SetBitInByte(ref twoFlagsBytes[0], 5);
+								break;
+							case FrameFlags.SpeedValid:
+								SetBitInByte(ref twoFlagsBytes[0], 6);
+								break;
+							case FrameFlags.AltitudeValid:
+								SetBitInByte(ref twoFlagsBytes[1], 6);
+								break;
+							case FrameFlags.HeadingValid:
+								SetBitInByte(ref twoFlagsBytes[1], 7);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
+
+						}
+					}
+				}
+
+				writer.Write(twoFlagsBytes);
+				//write zero in 6 bytes (offset 118 to 124)
+				writer.Write(new short());
+				writer.Write(new int());
 				writer.Write(timeOffsetMiliseconds);
 
 				//increase offset value
@@ -804,7 +842,7 @@
 				writer.Write((float)frame.Altitude.GetFoots());
 				writer.Write(frame.Heading);
 
-				//
+				//write flags
 				var twoFlagsBytes = new byte[2];
 				//sets bits in two bytes
 				if (frame.Flags != null)
@@ -1261,11 +1299,3 @@
 		}
 	}
 }
-/*
- * pitch:
- * + right side turn
- * - left side turn
- * roll:
- * + front side turn 
- * - back side turn 
-*/
