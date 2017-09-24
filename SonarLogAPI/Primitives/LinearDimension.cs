@@ -204,6 +204,11 @@
 			return new LinearDimension(left.GetMeters() * right, LinearDimensionUnit.Meter);
 		}
 
+		public static LinearDimension operator /(LinearDimension left, double right)
+		{
+			return new LinearDimension(left.GetMeters() / right, LinearDimensionUnit.Meter);
+		}
+
 		public static double operator /(LinearDimension left, LinearDimension right)
 		{
 			return left.GetMeters() / right.GetMeters();
