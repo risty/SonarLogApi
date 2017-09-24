@@ -50,14 +50,24 @@
 
 	public enum FrameFlags : byte
 	{
-		TrackValid,
-		WaterSpeedValid,
-		PositionValid,
-		WaterTempValid,
-		SpeedValid,
-		AltitudeValid,
-		HeadingValid
+		TrackValid = 0,
+		Preset_0_1 = 1,
+		Unknown0_2 = 2,
+		PositionValid = 3,
+		Unknown_0_4 = 4,
+		CourseOrSpeed_0_5 = 5,
+		SpeedValid = 6,
+		Preset_0_7 = 7,
+		Unknown1_0 = 8,
+		AltitudeOrCourseOrSpeed_1_1 = 9,
+		Unknown1_2 = 10,
+		Unknown1_3 = 11,
+		Unknown1_4 = 12,
+		Unknown1_5 = 13,
+		AltitudeValid = 14,
+		HeadingValid = 15
 	}
+
 
 	/// <summary>
 	/// Map of Sl2 Frame properties offsets
@@ -531,13 +541,31 @@
 			if (IsBitSet(flagsBytes[0], 0))
 				frame.Flags.Add(FrameFlags.TrackValid);
 			if (IsBitSet(flagsBytes[0], 1))
-				frame.Flags.Add(FrameFlags.WaterSpeedValid);
+				frame.Flags.Add(FrameFlags.Preset_0_1);
+			if (IsBitSet(flagsBytes[0], 2))
+				frame.Flags.Add(FrameFlags.Unknown0_2);
 			if (IsBitSet(flagsBytes[0], 3))
 				frame.Flags.Add(FrameFlags.PositionValid);
+			if (IsBitSet(flagsBytes[0], 4))
+				frame.Flags.Add(FrameFlags.Unknown_0_4);
 			if (IsBitSet(flagsBytes[0], 5))
-				frame.Flags.Add(FrameFlags.WaterTempValid);
+				frame.Flags.Add(FrameFlags.CourseOrSpeed_0_5);
 			if (IsBitSet(flagsBytes[0], 6))
 				frame.Flags.Add(FrameFlags.SpeedValid);
+			if (IsBitSet(flagsBytes[0], 7))
+				frame.Flags.Add(FrameFlags.Preset_0_7);
+			if (IsBitSet(flagsBytes[1], 0))
+				frame.Flags.Add(FrameFlags.Unknown1_0);
+			if (IsBitSet(flagsBytes[1], 1))
+				frame.Flags.Add(FrameFlags.AltitudeOrCourseOrSpeed_1_1);
+			if (IsBitSet(flagsBytes[1], 2))
+				frame.Flags.Add(FrameFlags.Unknown1_2);
+			if (IsBitSet(flagsBytes[1], 3))
+				frame.Flags.Add(FrameFlags.Unknown1_3);
+			if (IsBitSet(flagsBytes[1], 4))
+				frame.Flags.Add(FrameFlags.Unknown1_4);
+			if (IsBitSet(flagsBytes[1], 5))
+				frame.Flags.Add(FrameFlags.Unknown1_5);
 			if (IsBitSet(flagsBytes[1], 6))
 				frame.Flags.Add(FrameFlags.AltitudeValid);
 			if (IsBitSet(flagsBytes[1], 7))
@@ -644,44 +672,11 @@
 				writer.Write(frame.CourseOverGround);
 				writer.Write((float)frame.Altitude.GetFoots());
 				writer.Write(frame.Heading);
+				
 				//write flags
-				var twoFlagsBytes = new byte[2];
-				//sets bits in two bytes
-				if (frame.Flags != null)
-				{
-					foreach (var frameFlag in frame.Flags)
-					{
-						switch (frameFlag)
-						{
-							case FrameFlags.TrackValid:
-								SetBitInByte(ref twoFlagsBytes[0], 0);
-								break;
-							case FrameFlags.WaterSpeedValid:
-								SetBitInByte(ref twoFlagsBytes[0], 1);
-								break;
-							case FrameFlags.PositionValid:
-								SetBitInByte(ref twoFlagsBytes[0], 3);
-								break;
-							case FrameFlags.WaterTempValid:
-								SetBitInByte(ref twoFlagsBytes[0], 5);
-								break;
-							case FrameFlags.SpeedValid:
-								SetBitInByte(ref twoFlagsBytes[0], 6);
-								break;
-							case FrameFlags.AltitudeValid:
-								SetBitInByte(ref twoFlagsBytes[1], 6);
-								break;
-							case FrameFlags.HeadingValid:
-								SetBitInByte(ref twoFlagsBytes[1], 7);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException();
-
-						}
-					}
-				}
-
+				var twoFlagsBytes = TwoFlagsBytes(frame);
 				writer.Write(twoFlagsBytes);
+
 				//write zero in 6 bytes (offset 118 to 124)
 				writer.Write(new short());
 				writer.Write(new int());
@@ -843,43 +838,9 @@
 				writer.Write(frame.Heading);
 
 				//write flags
-				var twoFlagsBytes = new byte[2];
-				//sets bits in two bytes
-				if (frame.Flags != null)
-				{
-					foreach (var frameFlag in frame.Flags)
-					{
-						switch (frameFlag)
-						{
-							case FrameFlags.TrackValid:
-								SetBitInByte(ref twoFlagsBytes[0], 0);
-								break;
-							case FrameFlags.WaterSpeedValid:
-								SetBitInByte(ref twoFlagsBytes[0], 1);
-								break;
-							case FrameFlags.PositionValid:
-								SetBitInByte(ref twoFlagsBytes[0], 3);
-								break;
-							case FrameFlags.WaterTempValid:
-								SetBitInByte(ref twoFlagsBytes[0], 5);
-								break;
-							case FrameFlags.SpeedValid:
-								SetBitInByte(ref twoFlagsBytes[0], 6);
-								break;
-							case FrameFlags.AltitudeValid:
-								SetBitInByte(ref twoFlagsBytes[1], 6);
-								break;
-							case FrameFlags.HeadingValid:
-								SetBitInByte(ref twoFlagsBytes[1], 7);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException();
-
-						}
-					}
-				}
-
+				var twoFlagsBytes = TwoFlagsBytes(frame);
 				writer.Write(twoFlagsBytes);
+
 				//write zeros in 6 bytes (from offset 134 to 140)
 				writer.Write(new short());
 				writer.Write(new short());
@@ -890,6 +851,78 @@
 				timeOffsetMiliseconds++;
 				writer.Write(frame.SoundedData.Data);
 			}
+		}
+
+		/// <summary>
+		/// Converts Frames flags to two bytes
+		/// </summary>
+		/// <param name="frame"><see cref="Frame"/></param>
+		/// <returns>Array of two bytes</returns>
+		private static byte[] TwoFlagsBytes(Frame frame)
+		{
+			var twoFlagsBytes = new byte[2];
+			//sets bits in two bytes
+			if (frame.Flags != null)
+			{
+				foreach (var frameFlag in frame.Flags)
+				{
+					switch (frameFlag)
+					{
+						case FrameFlags.TrackValid:
+							SetBitInByte(ref twoFlagsBytes[0], 0);
+							break;
+						case FrameFlags.Preset_0_1:
+							SetBitInByte(ref twoFlagsBytes[0], 1);
+							break;
+						case FrameFlags.Unknown0_2:
+							SetBitInByte(ref twoFlagsBytes[0], 2);
+							break;
+						case FrameFlags.PositionValid:
+							SetBitInByte(ref twoFlagsBytes[0], 3);
+							break;
+						case FrameFlags.Unknown_0_4:
+							SetBitInByte(ref twoFlagsBytes[0], 4);
+							break;
+						case FrameFlags.CourseOrSpeed_0_5:
+							SetBitInByte(ref twoFlagsBytes[0], 5);
+							break;
+						case FrameFlags.SpeedValid:
+							SetBitInByte(ref twoFlagsBytes[0], 6);
+							break;
+						case FrameFlags.Preset_0_7:
+							SetBitInByte(ref twoFlagsBytes[0], 7);
+							break;
+						case FrameFlags.Unknown1_0:
+							SetBitInByte(ref twoFlagsBytes[1], 0);
+							break;
+						case FrameFlags.AltitudeOrCourseOrSpeed_1_1:
+							SetBitInByte(ref twoFlagsBytes[1], 1);
+							break;
+						case FrameFlags.Unknown1_2:
+							SetBitInByte(ref twoFlagsBytes[1], 2);
+							break;
+						case FrameFlags.Unknown1_3:
+							SetBitInByte(ref twoFlagsBytes[1], 3);
+							break;
+						case FrameFlags.Unknown1_4:
+							SetBitInByte(ref twoFlagsBytes[1], 4);
+							break;
+						case FrameFlags.Unknown1_5:
+							SetBitInByte(ref twoFlagsBytes[1], 5);
+							break;
+						case FrameFlags.AltitudeValid:
+							SetBitInByte(ref twoFlagsBytes[1], 6);
+							break;
+						case FrameFlags.HeadingValid:
+							SetBitInByte(ref twoFlagsBytes[1], 7);
+							break;
+
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+				}
+			}
+			return twoFlagsBytes;
 		}
 
 		/// <summary>
