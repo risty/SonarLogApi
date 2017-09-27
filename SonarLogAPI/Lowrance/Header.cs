@@ -14,7 +14,7 @@
 	}
 
 	/// <summary>
-	/// SlG/SL2/SL3 binary file header, 10 bytes lenght
+	/// SlG/SL2/SL3 binary file header, 8 bytes lenght
 	/// </summary>
 	public struct Header
 	{
