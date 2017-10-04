@@ -1,6 +1,8 @@
 ﻿namespace SonarLogAPI.Primitives
 {
-
+	/// <summary>
+	/// Interface for source of geographical location point
+	/// </summary>
 	public interface ICoordinatePointSource
 	{
 		/// <summary>
