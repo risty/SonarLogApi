@@ -6,6 +6,7 @@
 	/// <summary>
 	/// The log entry with information from compass.
 	/// </summary>
+	/// <seealso cref="http://en.wikipedia.org/wiki/Flight_dynamics_(fixed-wing_aircraft)"/>
 	public class CompassLogEntry : ICoordinatePointSource
 	{
 		/// <summary>
@@ -22,12 +23,12 @@
 		public double Heading { get; set; }
 
 		/// <summary>
-		/// Pitch in radians. "-" front side turn and "+" back side turn
+		/// Pitch in radians. "-" front side turn and "+" back side turn.
 		/// </summary>
 		public double Pitch { get; set; }
 
 		/// <summary>
-		/// Roll in radians. "+" for right side turn and "-" left side turn
+		/// Roll in radians. "+" for right side turn and "-" left side turn.
 		/// </summary>
 		public double Roll { get; set; }
 	}
