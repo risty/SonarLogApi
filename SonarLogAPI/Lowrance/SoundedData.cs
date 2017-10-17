@@ -33,16 +33,17 @@
 		/// <summary>
 		/// Create instance of <see cref="SoundedData"/>.
 		/// </summary>
-		/// <param name="data">Existed sounded data</param>
-		/// <param name="channelType"></param>
-		/// <param name="upperLimit"></param>
-		/// <param name="lowerLimit"></param>
+		/// <param name="data">Sounded data</param>
+		/// <param name="channelType"><see cref="Frame.ChannelType"/></param>
+		/// <param name="upperLimit"><see cref="UpperLimit"/></param>
+		/// <param name="lowerLimit"><see cref="LowerLimit"/></param>
 		public SoundedData(byte[] data, ChannelType channelType, LinearDimension upperLimit, LinearDimension lowerLimit)
 		{
 			Data = data;
 			ChannelType = channelType;
 			UpperLimit = upperLimit;
 			LowerLimit = lowerLimit;
+
 		}
 
 		/// <summary>
@@ -162,7 +163,11 @@
 			return arrayForSoundedData;
 		}
 
-	
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return $"From {LowerLimit:#.#} to {UpperLimit:#.#}, lenght {Data.Length}.";
+		}
 
 	}
 }
