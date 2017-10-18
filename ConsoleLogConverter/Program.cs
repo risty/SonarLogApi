@@ -537,14 +537,21 @@
 								cvsData.Points.Add(new CsvLogEntry(frame));
 							}
 
-							//cvsData.Points = cvsData.Points.Distinct().ToList();
-							//new CvsLogEntry.CvsLogEntryComparer()
-							//var groups = cvsData.Points.GroupBy(point => point.Point).ToList();
+							//func for getting point with average depth from group
+							Func<IGrouping<CoordinatePoint, CsvLogEntry>, CsvLogEntry> GetAveragePointFromGroup = points =>
+							{
+								var averageDepthInMeters = points.Average(pnt => pnt.Depth.GetMeters());
+								return new CsvLogEntry
+								{
+									Depth = LinearDimension.FromMeters(averageDepthInMeters),
+									Point = points.Key
+								};
+							};
 
-							//grouping by coordinate points
+							//grouping points by coordinate and take point with aver
 							cvsData.Points = cvsData.Points.GroupBy(point => point.Point)
-															.Select(g => g.First())
-															.ToList();
+								.Select(GetAveragePointFromGroup)
+								.ToList();
 
 							//writing points to file
 							try
