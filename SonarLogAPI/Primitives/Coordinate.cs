@@ -23,7 +23,7 @@ namespace SonarLogAPI.Primitives
 		/// </summary>
 		public double Minutes
 		{
-			get { return _minutes; }
+			get => _minutes;
 			set
 			{
 				if (value < 0 || value > 60)
@@ -38,7 +38,7 @@ namespace SonarLogAPI.Primitives
 		/// </summary>
 		public double Seconds
 		{
-			get { return _seconds; }
+			get => _seconds;
 			set
 			{
 				if (value < 0 || value > 60)
@@ -56,8 +56,7 @@ namespace SonarLogAPI.Primitives
 		{
 			var absValue = Math.Abs(value);
 
-			double fraction;
-			Degrees = FromDoubleToIntAndFractionIn60ThSystem(absValue, out fraction);
+			Degrees = FromDoubleToIntAndFractionIn60ThSystem(absValue, out var fraction);
 			Minutes = FromDoubleToIntAndFractionIn60ThSystem(fraction, out fraction);
 			Seconds = fraction;
 
@@ -74,8 +73,7 @@ namespace SonarLogAPI.Primitives
 			if (minutes < 0)
 				throw new ArgumentOutOfRangeException(nameof(Minutes), "can't be less zero");
 
-			double fraction;
-			Minutes = FromDoubleToIntAndFractionIn60ThSystem(minutes, out fraction);
+			Minutes = FromDoubleToIntAndFractionIn60ThSystem(minutes, out var fraction);
 			Seconds = fraction;
 
 		}
@@ -147,8 +145,7 @@ namespace SonarLogAPI.Primitives
 
 		public override bool Equals(object obj)
 		{
-			var item = obj as Coordinate;
-			return item != null && Equals(item);
+			return obj is Coordinate item && Equals(item);
 		}
 
 		public override int GetHashCode()

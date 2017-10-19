@@ -54,9 +54,7 @@
 			{
 				data.Header = Header.ReadHeader(reader, 0);
 
-				DateTimeOffset fileCreationDateTime;
-
-				var framesMap = Frame.GetFramesMap(reader, Header.Lenght, data.Header.FileVersion, out fileCreationDateTime);
+				var framesMap = Frame.GetFramesMap(reader, Header.Lenght, data.Header.FileVersion, out var fileCreationDateTime);
 
 				data.CreationDateTime = fileCreationDateTime;
 

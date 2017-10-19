@@ -250,9 +250,7 @@
 						Console.WriteLine("Trying parse depth shift value...");
 					}
 
-					double value;
-
-					if (DepthShiftTryParse(options.DepthShift, out value))
+					if (DepthShiftTryParse(options.DepthShift, out var value))
 					{
 						if (options.Verbose) Console.WriteLine("Depth shift value is:{0}", value);
 
@@ -281,9 +279,7 @@
 					var generateFromDepth = false;
 					foreach (var optionsGenegateParam in options.GenegateParams)
 					{
-						ChannelType channelType;
-
-						if (Enum.TryParse(optionsGenegateParam, out channelType))
+						if (Enum.TryParse<ChannelType>(optionsGenegateParam, out var channelType))
 						{
 							if (!dstChannel.Any()) dstChannel.Add(channelType);
 							else sourceChannels.Add(channelType);
@@ -417,17 +413,16 @@
 				//makes outut file if it necessary
 				if (options.OutputFileVersion != null && options.OutputFileVersion.Any())
 				{
-					Func<Frame, bool> frameValidationFunc = frame =>
+					bool FrameValidationFunc(Frame frame)
 					{
 						var isIndexValid = frame.FrameIndex >= options.FramesFrom && frame.FrameIndex <= options.FramesTo;
 
 						return outputchannels.Any() ? outputchannels.Contains(frame.ChannelType) && isIndexValid : isIndexValid;
-
-					};
+					}
 
 					Console.WriteLine("Making new frames list...\n");
 					stopWatch.Start();
-					var newFrames = data.Frames.Where(frameValidationFunc).ToList();
+					var newFrames = data.Frames.Where(FrameValidationFunc).ToList();
 					stopWatch.Stop();
 					Console.WriteLine("List created.  Creation time: " + stopWatch.Elapsed + "\n");
 					stopWatch.Reset();
@@ -443,15 +438,17 @@
 						var rnd = new Random();
 						double lat = rnd.Next(-90, 90);
 						double lon = rnd.Next(-180, 180);
-						Func<Frame, Frame> coordinatesDelete = frame =>
+
+						//func for coordinate point delete
+						Frame CoordinatesDelete(Frame frame)
 						{
 							frame.Point = new CoordinatePoint(Latitude.FromDegrees(frame.Point.Latitude.ToDegrees() % 1 + lat),
 								Longitude.FromDegrees(frame.Point.Longitude.ToDegrees() % 1 + lon));
-
 							return frame;
-						};
+						}
 
-						newFrames = newFrames.Select(coordinatesDelete).ToList();
+						//coordinate point delete
+						newFrames = newFrames.Select(CoordinatesDelete).ToList();
 						stopWatch.Stop();
 						Console.WriteLine("Anonymizations time: " + stopWatch.Elapsed + "\n");
 						stopWatch.Reset();
@@ -538,7 +535,7 @@
 							}
 
 							//func for getting point with average depth from group
-							Func<IGrouping<CoordinatePoint, CsvLogEntry>, CsvLogEntry> GetAveragePointFromGroup = points =>
+							CsvLogEntry GetAveragePointFromGroup(IGrouping<CoordinatePoint, CsvLogEntry> points)
 							{
 								var averageDepthInMeters = points.Average(pnt => pnt.Depth.GetMeters());
 								return new CsvLogEntry
@@ -546,7 +543,7 @@
 									Depth = LinearDimension.FromMeters(averageDepthInMeters),
 									Point = points.Key
 								};
-							};
+							}
 
 							//grouping points by coordinate and take point with aver
 							cvsData.Points = cvsData.Points.GroupBy(point => point.Point)
@@ -566,7 +563,6 @@
 									stopWatch.Stop();
 									Console.WriteLine("{0} points writing complete.  Writing time: {1} \n", cvsData.Points.Count, stopWatch.Elapsed);
 									stopWatch.Reset();
-
 								}
 							}
 							catch (Exception ex)

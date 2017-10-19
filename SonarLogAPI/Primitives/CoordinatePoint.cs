@@ -291,7 +291,7 @@
 		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(double lat1, double long1, double lat2, double long2, double altitude = 0)
 		{
 			//degree(pow) reduction formula
-			Func<double, double> sinPow2 = angleRadians => (1 - Math.Cos(2 * angleRadians)) / 2;
+			double SinPow2(double angleRadians) => (1 - Math.Cos(2 * angleRadians)) / 2;
 
 			double deltaLatitudeRadians = (lat2 - lat1) * _d2R;
 			double deltaLongitudeRadians = (long2 - long1) * _d2R;
@@ -299,9 +299,9 @@
 			double meridional = GetMeridionalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
 			double primeVertical = GetPrimeVerticalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
 			double q = deltaLatitudeRadians * meridional * 
-				(1 - (2 * Math.Pow(deltaLongitudeRadians, 2d) + Math.Pow(deltaLongitudeRadians, 2d) * sinPow2(meridional)) / 24);
+				(1 - (2 * Math.Pow(deltaLongitudeRadians, 2d) + Math.Pow(deltaLongitudeRadians, 2d) * SinPow2(meridional)) / 24);
 			double p = deltaLongitudeRadians * primeVertical * Math.Cos(middleLongitudeRadians) *
-			           (1 + (Math.Pow(deltaLatitudeRadians, 2d) - Math.Pow(deltaLongitudeRadians, 2d) * sinPow2(middleLongitudeRadians)) / 24);
+			           (1 + (Math.Pow(deltaLatitudeRadians, 2d) - Math.Pow(deltaLongitudeRadians, 2d) * SinPow2(middleLongitudeRadians)) / 24);
 
 			return LinearDimension.FromMeters(Math.Sqrt(Math.Pow(q,2d)+ Math.Pow(p, 2d)));
 		}

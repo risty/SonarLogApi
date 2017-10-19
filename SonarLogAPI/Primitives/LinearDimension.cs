@@ -130,8 +130,7 @@
 		/// <returns></returns>
 		public static bool TryParse(string stringvalue, LinearDimensionUnit depthUnit, out LinearDimension depth)
 		{
-			double result;
-			var isSuccessParse = double.TryParse(stringvalue, out result);
+			var isSuccessParse = double.TryParse(stringvalue, out var result);
 
 			depth = null;
 			if (isSuccessParse)

@@ -1206,8 +1206,7 @@
 				var substrings = cof[i].Split(' ').Where(substring => substring != "").ToArray();
 				foreach (var substring in substrings)
 				{
-					double val;
-					if (double.TryParse(substring, NumberStyles.Number, CultureInfo.InvariantCulture, out val)) values.Add(val);
+					if (double.TryParse(substring, NumberStyles.Number, CultureInfo.InvariantCulture, out var val)) values.Add(val);
 				}
 
 				gnmWmm[(int)values[0], (int)values[1]] = values[2];

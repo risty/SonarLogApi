@@ -112,8 +112,7 @@
 		/// <returns>Conversion successed or failed</returns>
 		public static bool TryParse(string stringvalue, out Longitude latitude)
 		{
-			double result;
-			var isSuccessParse = double.TryParse(stringvalue, out result);
+			var isSuccessParse = double.TryParse(stringvalue, out var result);
 
 			latitude = null;
 			if (isSuccessParse)
@@ -134,9 +133,7 @@
 
 		public override bool Equals(object obj)
 		{
-			var item = obj as Longitude;
-
-			return item != null && Equals(item);
+			return obj is Longitude item && Equals(item);
 		}
 
 		public override int GetHashCode()

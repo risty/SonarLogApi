@@ -271,10 +271,9 @@
 		/// T7 is <see cref="ChannelType"/></returns>
 		public static IDictionary<int, Tuple<byte[], short, short, int, float, int, ChannelType>> ValuesResearch(BinaryReader reader, int firstFrameFirstByteOffset, int valueByteOffset, FileVersion version)
 		{
-			DateTimeOffset filecreationtime;
 			var dictionary = new Dictionary<int, Tuple<byte[], short, short, int, float, int, ChannelType>>();
 			var slType = GetOffsetsTypeForFileVersion(version);
-			var map = GetFramesMap(reader, firstFrameFirstByteOffset, version, out filecreationtime);
+			var map = GetFramesMap(reader, firstFrameFirstByteOffset, version, out _);
 
 			foreach (var position in map.Select(tuple => tuple.Item1))
 			{
