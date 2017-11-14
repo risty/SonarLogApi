@@ -615,6 +615,9 @@
 			int lastSidescanCompositeChannelFrameOffset = 0;
 			int lastThreeDChannelFrameOffset = 0;
 
+			//take earlies date from frames and start writing from it 
+			var firstFrameTime = framesToWrite.Select(frame => frame.DateTimeOffset).Min();
+			int lastFrameIndex = 0;
 			int timeOffsetMiliseconds = 0;
 
 			short previousFrameSize = 0;
@@ -644,11 +647,21 @@
 				writer.Write(new long());
 				writer.Write(new int());
 
-				//if it first frame then write creation time = DateTimeOffset.Now
-				//else zero
+				//if it's first frame then write file creation time = earliest time fram all the frames
 				if (frameOffset == framesSetStartByteOffset)
-					writer.Write((int)DateTimeOffset.Now.ToUnixTimeSeconds());
-				else writer.Write(new int());
+					writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
+				else
+				{
+					//increase offset value
+					if (lastFrameIndex != frame.FrameIndex)
+					{
+						lastFrameIndex = frame.FrameIndex;
+						//add 150ms for the frame time offset
+						timeOffsetMiliseconds += 150;
+					}
+					//write time offset
+					writer.Write(timeOffsetMiliseconds);
+				}
 
 				writer.Write(frame.PacketSize);
 				//write zero in 2 bytes (offset 46 to 48)
@@ -671,7 +684,7 @@
 				writer.Write(frame.CourseOverGround);
 				writer.Write((float)frame.Altitude.GetFoots());
 				writer.Write(frame.Heading);
-				
+
 				//write flags
 				var twoFlagsBytes = TwoFlagsBytes(frame);
 				writer.Write(twoFlagsBytes);
@@ -680,9 +693,6 @@
 				writer.Write(new short());
 				writer.Write(new int());
 				writer.Write(timeOffsetMiliseconds);
-
-				//increase offset value
-				timeOffsetMiliseconds++;
 
 				switch (frame.ChannelType)
 				{
@@ -744,6 +754,9 @@
 			int lastSidescanRightChannelFrameOffset = 0;
 			int lastSidescanCompositeChannelFrameOffset = 0;
 
+			//take earlies date from frames and start writing from it 
+			var firstFrameTime = framesToWrite.Select(frame=> frame.DateTimeOffset).Min();
+			int lastFrameIndex = 0;
 			int timeOffsetMiliseconds = 0;
 
 			short previousFrameSize = 0;
@@ -793,7 +806,6 @@
 				writer.Write(newFrameSize);
 				writer.Write(previousFrameSize);
 
-				frameOffset += newFrameSize;
 				previousFrameSize = newFrameSize;
 
 				writer.Write((short)frame.ChannelType);
@@ -808,12 +820,21 @@
 				writer.Write(new long());
 				writer.Write(new byte());
 
-				//if it first frame then write creation time = DateTimeOffset.Now
-				//else zero
+				//if it's first frame then write file creation time = earliest time fram all the frames
 				if (frameOffset == framesSetStartByteOffset)
-					writer.Write((int)DateTimeOffset.Now.ToUnixTimeSeconds());
+					writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
 				else
-					writer.Write(new int());
+				{
+					//increase offset value
+					if (lastFrameIndex != frame.FrameIndex)
+					{
+						lastFrameIndex = frame.FrameIndex;
+						//add 150ms for the frame time offset
+						timeOffsetMiliseconds += 150;
+					}
+					//write time offset
+					writer.Write(timeOffsetMiliseconds);
+				}
 
 				writer.Write((float)frame.Depth.GetFoots());
 
@@ -844,11 +865,15 @@
 				writer.Write(new short());
 				writer.Write(new short());
 				writer.Write(new short());
-				//writes new time offset
+
+				//write time offset
 				writer.Write(timeOffsetMiliseconds);
-				//increase offset value
-				timeOffsetMiliseconds++;
+
+				//write Sounded Data
 				writer.Write(frame.SoundedData.Data);
+
+				//add newFrameSize to frameOffset at the end
+				frameOffset += newFrameSize;
 			}
 		}
 
