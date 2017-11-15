@@ -309,11 +309,11 @@
 					//continue if sourceChannels.Any()
 					if (sourceChannels.Any())
 					{
-						//get unique frames from sourse channel(s)
+						//get unique frames(by FrameIndex) from sourse channel(s) 
 						var unicueFrameFromSourceChanels = data.Frames
 							.Where(frame => sourceChannels.Contains(frame.ChannelType))
-							.GroupBy(frame => frame.Point)
-							.Select(g => g.First())
+							.GroupBy(frame => frame.FrameIndex)
+							.Select(group => group.First())
 							.ToList();
 
 						var erasedPointsCountAtDstChannel = 0;
