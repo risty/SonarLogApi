@@ -7,25 +7,28 @@
 
 	using SonarLogAPI.Primitives;
 
+	/// <summary>
+	/// Depth adjuster.
+	/// </summary>
 	public class DepthAdjuster
 	{
 		private readonly object _syncRoot = new object();
 
 		/// <summary>
-		/// Base points sequence
+		/// Base points sequence.
 		/// </summary>
 		public IEnumerable<IDepthPointSource> BasePoints { get; set; }
 
 		/// <summary>
-		/// Adjustable points sequence
+		/// Adjustable points sequence.
 		/// </summary>
 		public IEnumerable<IDepthPointSource> AdjustablePoints { get; set; }
 
 		/// <summary>
-		/// Create instance of <see cref="DepthAdjuster"/>
+		/// Create instance of <see cref="DepthAdjuster"/>.
 		/// </summary>
-		/// <param name="basePoints">Base points sequence</param>
-		/// <param name="adjustablePoints">Adjustable points sequence</param>
+		/// <param name="basePoints">Base points sequence.</param>
+		/// <param name="adjustablePoints">Adjustable points sequence.</param>
 		public DepthAdjuster(IEnumerable<IDepthPointSource> basePoints, IEnumerable<IDepthPointSource> adjustablePoints)
 		{
 			BasePoints = basePoints;
@@ -33,9 +36,9 @@
 		}
 
 		/// <summary>
-		/// Ajust depth at <see cref="AdjustablePoints"/>
+		/// Ajust depth at <see cref="AdjustablePoints"/>.
 		/// </summary>
-		/// <returns><see cref="AdjustablePoints"/> after depth adjust</returns>
+		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
 		public IEnumerable<IDepthPointSource> AdjustDepth()
 		{
 			var nearestPoint = FindNearestPoint(BasePoints, AdjustablePoints);
@@ -45,7 +48,7 @@
 		/// <summary>
 		/// Ajust depth at <see cref="AdjustablePoints"/> async.
 		/// </summary>
-		/// <returns><see cref="AdjustablePoints"/> after depth adjust</returns>
+		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
 		public Task<IEnumerable<IDepthPointSource>> AdjustDepthAsync()
 		{
 			return Task.Run(() => AdjustDepth());
@@ -54,9 +57,9 @@
 		/// <summary>
 		/// Find nearest points at two sequence.
 		/// </summary>
-		/// <param name="firstSequence">First points sequence</param>
-		/// <param name="secondSequence">Second points sequence</param>
-		/// <returns><see cref="NearestPointsEventArgs"/></returns>
+		/// <param name="firstSequence">First points sequence.</param>
+		/// <param name="secondSequence">Second points sequence.</param>
+		/// <returns><see cref="NearestPointsEventArgs"/>.</returns>
 		private NearestPointsEventArgs FindNearestPoint(IEnumerable<IDepthPointSource> firstSequence, IEnumerable<IDepthPointSource> secondSequence)
 		{
 			var uniqueBasePoints = firstSequence.GroupBy(point => point.Point)
@@ -113,11 +116,11 @@
 		}
 
 		/// <summary>
-		/// Ajust depth at sequence of points/>
+		/// Ajust depth at sequence of points.
 		/// </summary>
-		/// <param name="innerSequence">Sequence of points to adjust depth</param>
-		/// <param name="ajustValue">Value to add to depth</param>
-		/// <returns>Sequence of points after depth adjust</returns>
+		/// <param name="innerSequence">Sequence of points to adjust depth.</param>
+		/// <param name="ajustValue">Value to add to depth.</param>
+		/// <returns>Sequence of points after depth adjust.</returns>
 		private static IEnumerable<IDepthPointSource> AdjustDepth(IEnumerable<IDepthPointSource> innerSequence, LinearDimension ajustValue)
 		{
 			var depthPointSources = innerSequence as IDepthPointSource[] ?? innerSequence.ToArray();
@@ -138,7 +141,7 @@
 		}
 
 		/// <summary>
-		/// EventArgs with information about two nearest points and distance between em
+		/// EventArgs with information about two nearest points and distance between em.
 		/// </summary>
 		public class NearestPointsEventArgs : EventArgs
 		{

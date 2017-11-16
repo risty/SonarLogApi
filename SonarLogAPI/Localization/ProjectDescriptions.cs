@@ -10,6 +10,6 @@
 		/// <summary>Gets copyright information.</summary>
 		public const string Copyright = "Copyright @ Bagrich Ivan 2016-2017";
 		/// <summary>Gets version information.</summary>
-		public const string Version = "0.4";
+		public const string Version = "0.5";
 	}
 }

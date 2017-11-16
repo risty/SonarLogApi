@@ -7,6 +7,9 @@
 
 	using Primitives;
 
+	/// <summary>
+	/// <see cref="ChannelType"/> from which frame is given.
+	/// </summary>
 	public enum ChannelType : byte
 	{
 		/// <summary>
@@ -293,6 +296,9 @@
 			return dictionary;
 		}
 
+		/// <summary>
+		///Values, which are specific for sl2 frame type.
+		/// </summary>
 		private static IEnumerable<int> SpecificSL2FrameValues => new[]
 		{
 	
@@ -321,6 +327,9 @@
 
 		};
 
+		/// <summary>
+		/// Values, which are specific for sl3 frame type.
+		/// </summary>
 		private static IEnumerable<int> SpecificSL3FrameValues => new[]
 		{	
 			/*Looking for the 
@@ -340,11 +349,11 @@
 		};
 
 		/// <summary>
-		/// Verify SL log file and create frames map
+		/// Verify SL log file and create frames map.
 		/// </summary>
-		/// <param name="reader"><see cref="BinaryReader"/></param>
-		/// <param name="readPosition">Offset of first frame (in bytes) in <see cref="BinaryReader"/>'s stream </param>
-		/// <param name="version"><see cref="FileVersion"/></param>
+		/// <param name="reader"><see cref="BinaryReader"/>.</param>
+		/// <param name="readPosition">Offset of first frame (in bytes) in <see cref="BinaryReader"/>'s stream.</param>
+		/// <param name="version"><see cref="FileVersion"/>.</param>
 		/// <param name="fileCreationTime">File creation time.</param>
 		/// <returns>Sequence(tuple) of frames offsets at reader and Timespans from logging start.</returns>
 		public static IEnumerable<Tuple<int, TimeSpan>> GetFramesMap(BinaryReader reader, int readPosition, FileVersion version, out DateTimeOffset fileCreationTime)
@@ -475,9 +484,9 @@
 		}
 
 		/// <summary>
-		/// Read frame from Reader
+		/// Read frame from Reader.
 		/// </summary>
-		/// <param name="reader"><see cref="BinaryReader"/></param>
+		/// <param name="reader"><see cref="BinaryReader"/>.</param>
 		/// <param name="frameStartByteOffset">Frame offset in readers stream.</param>
 		/// <param name="version"><see cref="FileVersion"/>.</param>
 		/// <returns><see cref="Frame"/> object.</returns>
@@ -578,12 +587,12 @@
 		}
 
 		/// <summary>
-		/// Write sequence of frames to writer
+		/// Write sequence of frames to writer.
 		/// </summary>
-		/// <param name="writer"><see cref="BinaryWriter"/></param>
-		/// <param name="framesToWrite">Sequence of frames to write</param>
-		/// <param name="framesSetStartByteOffset">offset of first frame in Writers stream</param>
-		/// <param name="version">Outer stream version</param>
+		/// <param name="writer"><see cref="BinaryWriter"/>.</param>
+		/// <param name="framesToWrite">Sequence of frames to write.</param>
+		/// <param name="framesSetStartByteOffset">Offset of first frame in Writers stream.</param>
+		/// <param name="version">Outer stream version.</param>
 		public static void WriteFrames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset, FileVersion version)
 		{
 			switch (version)
@@ -600,6 +609,12 @@
 			}
 		}
 
+		/// <summary>
+		/// Write sequence of SL3 frames to writer.
+		/// </summary>
+		/// <param name="writer"><see cref="BinaryWriter"/>.</param>
+		/// <param name="framesToWrite">Sequence of frames to write.</param>
+		/// <param name="framesSetStartByteOffset">Offset of first frame in Writers stream.</param>
 		private static void WriteSl3Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
 		{
 			//sort before writing
@@ -615,7 +630,7 @@
 			int lastSidescanCompositeChannelFrameOffset = 0;
 			int lastThreeDChannelFrameOffset = 0;
 
-			//take earlies date from frames and start writing from it 
+			//take earliest date from frames and start writing from it 
 			var firstFrameTime = framesToWrite.Select(frame => frame.DateTimeOffset).Min();
 			int lastFrameIndex = 0;
 			int timeOffsetMiliseconds = 0;
@@ -738,6 +753,12 @@
 
 		}
 
+		/// <summary>
+		/// Write sequence of SL2 frames to writer.
+		/// </summary>
+		/// <param name="writer"><see cref="BinaryWriter"/>.</param>
+		/// <param name="framesToWrite">Sequence of frames to write.</param>
+		/// <param name="framesSetStartByteOffset">Offset of first frame in Writers stream.</param>
 		private static void WriteSl2Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
 		{
 			//takes frame with channel type != ChannelType.ThreeD and sort it after
@@ -755,7 +776,7 @@
 			int lastSidescanCompositeChannelFrameOffset = 0;
 
 			//take earlies date from frames and start writing from it 
-			var firstFrameTime = framesToWrite.Select(frame=> frame.DateTimeOffset).Min();
+			var firstFrameTime = framesToWrite.Select(frame => frame.DateTimeOffset).Min();
 			int lastFrameIndex = 0;
 			int timeOffsetMiliseconds = 0;
 
@@ -789,7 +810,7 @@
 					case ChannelType.SidescanComposite:
 						lastSidescanCompositeChannelFrameOffset = frameOffset;
 						break;
-					//sl2 cant contains ThreeD channel data
+					//sl2 can't contains ThreeD channel data
 					case ChannelType.ThreeD:
 						throw new ArgumentOutOfRangeException();
 					default:
@@ -878,10 +899,10 @@
 		}
 
 		/// <summary>
-		/// Converts Frames flags to two bytes
+		/// Converts Frames flags to two bytes.
 		/// </summary>
-		/// <param name="frame"><see cref="Frame"/></param>
-		/// <returns>Array of two bytes</returns>
+		/// <param name="frame"><see cref="Frame"/>.</param>
+		/// <returns>Array of two bytes.</returns>
 		private static byte[] TwoFlagsBytes(Frame frame)
 		{
 			var twoFlagsBytes = new byte[2];
@@ -950,10 +971,10 @@
 		}
 
 		/// <summary>
-		/// Gets offset map type for file version
+		/// Gets offset map type for file version.
 		/// </summary>
-		/// <param name="version"><see cref="SonarLogAPI.Lowrance.FileVersion"/></param>
-		/// <returns>Type of offset map</returns>
+		/// <param name="version"><see cref="SonarLogAPI.Lowrance.FileVersion"/>.</param>
+		/// <returns>Type of offset map.</returns>
 		private static Type GetOffsetsTypeForFileVersion(FileVersion version)
 		{
 			Type slType;
@@ -977,41 +998,41 @@
 		}
 
 		/// <summary>
-		/// Parse property to enum and convert it to byte
+		/// Parse property to enum and convert it to byte.
 		/// </summary>
-		/// <param name="slType">Type of enum</param>
-		/// <param name="propertyName">Property name</param>
-		/// <returns>Property byte representation</returns>
+		/// <param name="slType">Type of enum.</param>
+		/// <param name="propertyName">Property name.</param>
+		/// <returns>Property byte representation.</returns>
 		private static byte GetOffset(Type slType, string propertyName)
 		{
 			return Convert.ToByte(Enum.Parse(slType, propertyName));
 		}
 
 		/// <summary>
-		/// Converts Longitude double degrees value in WGS84 to int value in Lowrance format
+		/// Converts Longitude double degrees value in WGS84 to int value in Lowrance format.
 		/// </summary>
-		/// <param name="longitudeWGS84">Longitude double degrees value in WGS84</param>
-		/// <returns>Longitude int value in Lowrance format</returns>
+		/// <param name="longitudeWGS84">Longitude double degrees value in WGS84.</param>
+		/// <returns>Longitude int value in Lowrance format.</returns>
 		private static int ConvertLongitudeToLowranceInt(double longitudeWGS84)
 		{
 			return Convert.ToInt32(longitudeWGS84 * _earthWGS84PolarRadius / _radConversion);
 		}
 
 		/// <summary>
-		/// Converts Longitude int value in Lowrance format to double degrees value in WGS84 format
+		/// Converts Longitude int value in Lowrance format to double degrees value in WGS84 format.
 		/// </summary>
-		/// <param name="lowranceIntValue">Longitude int value in Lowrance format</param>
-		/// <returns>Double degrees value in WGS84 format</returns>
+		/// <param name="lowranceIntValue">Longitude int value in Lowrance format.</param>
+		/// <returns>Double degrees value in WGS84 format.</returns>
 		private static double ConvertLongitudeToWGS84(int lowranceIntValue)
 		{
 			return lowranceIntValue / _earthWGS84PolarRadius * _radConversion;
 		}
 
 		/// <summary>
-		/// Converts <see cref="Latitude"/> double degrees value in WGS84 to int value in Lowrance(Spherical Mercator Projection) format
+		/// Converts <see cref="Latitude"/> double degrees value in WGS84 to int value in Lowrance(Spherical Mercator Projection) format.
 		/// </summary>
-		/// <param name="latitudeWGS84">Latitude double degrees value in WGS84</param>
-		/// <returns>Latitude int value in Lowrance format</returns>
+		/// <param name="latitudeWGS84">Latitude double degrees value in WGS84.</param>
+		/// <returns>Latitude int value in Lowrance format.</returns>
 		private static int ConvertLatitudeToLowranceInt(double latitudeWGS84)
 		{
 			var temp = latitudeWGS84 / _radConversion;
@@ -1028,10 +1049,10 @@
 		}
 
 		/// <summary>
-		/// Sets specific bit in ref byte
+		/// Sets specific bit in ref byte.
 		/// </summary>
-		/// <param name="refByte">Byte ref</param>
-		/// <param name="position">Bit position</param>
+		/// <param name="refByte">Byte ref.</param>
+		/// <param name="position">Bit position.</param>
 		private static void SetBitInByte(ref byte refByte, int position)
 		{
 			if (position > 7) throw new ArgumentOutOfRangeException(nameof(position));
@@ -1042,11 +1063,11 @@
 		}
 
 		/// <summary>
-		/// Checks specific bit in byte set
+		/// Checks specific bit in byte set.
 		/// </summary>
 		/// <param name="b">Byte</param>
-		/// <param name="position">Bit position</param>
-		/// <returns>Is bit set or not</returns>
+		/// <param name="position">Bit position.</param>
+		/// <returns>Is bit set or not.</returns>
 		private static bool IsBitSet(byte b, int position)
 		{
 			if (position > 7) throw new ArgumentOutOfRangeException(nameof(position));

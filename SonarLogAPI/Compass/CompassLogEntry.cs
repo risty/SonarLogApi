@@ -3,10 +3,11 @@
 	using System;
 	using Primitives;
 
+	/// <inheritdoc />
 	/// <summary>
 	/// The log entry with information from compass.
 	/// </summary>
-	/// <seealso cref="http://en.wikipedia.org/wiki/Flight_dynamics_(fixed-wing_aircraft)"/>
+	/// <seealso cref="!:http://en.wikipedia.org/wiki/Flight_dynamics_(fixed-wing_aircraft)" />
 	public class CompassLogEntry : ICoordinatePointSource
 	{
 		/// <summary>

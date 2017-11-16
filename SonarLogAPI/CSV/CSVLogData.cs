@@ -4,6 +4,9 @@
 	using System.Collections.Generic;
 	using System.IO;
 
+	/// <summary>
+	///Log data that consists of CSV entries.
+	/// </summary>
 	public class CsvLogData
 	{
 		/// <summary>

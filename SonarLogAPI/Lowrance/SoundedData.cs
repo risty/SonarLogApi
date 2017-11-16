@@ -6,37 +6,37 @@
 	using SonarLogAPI.Primitives;
 
 	/// <summary>
-	/// Sounded data
+	/// Sounded data.
 	/// </summary>
 	public class SoundedData
 	{
 		/// <summary>
-		/// Inner byte array of data values
+		/// Inner byte array of data values.
 		/// </summary>
 		public byte[] Data { get; }
 
 		/// <summary>
-		/// Type of channel
+		/// Type of channel.
 		/// </summary>
 		public ChannelType ChannelType { get; }
 
 		/// <summary>
-		/// Upper limit of <see cref="SoundedData" />
+		/// Upper limit of <see cref="SoundedData" />.
 		/// </summary>
 		public LinearDimension UpperLimit { get; }
 
 		/// <summary>
-		/// Lower limit of <see cref="SoundedData" />
+		/// Lower limit of <see cref="SoundedData" />.
 		/// </summary>
 		public LinearDimension LowerLimit { get; }
 
 		/// <summary>
 		/// Create instance of <see cref="SoundedData"/>.
 		/// </summary>
-		/// <param name="data">Sounded data</param>
-		/// <param name="channelType"><see cref="Frame.ChannelType"/></param>
-		/// <param name="upperLimit"><see cref="UpperLimit"/></param>
-		/// <param name="lowerLimit"><see cref="LowerLimit"/></param>
+		/// <param name="data">Sounded data.</param>
+		/// <param name="channelType"><see cref="Frame.ChannelType"/>.</param>
+		/// <param name="upperLimit"><see cref="UpperLimit"/>.</param>
+		/// <param name="lowerLimit"><see cref="LowerLimit"/>.</param>
 		public SoundedData(byte[] data, ChannelType channelType, LinearDimension upperLimit, LinearDimension lowerLimit)
 		{
 			Data = data;
@@ -87,14 +87,14 @@
 		}
 
 		/// <summary>
-		/// Create instance of <see cref="SoundedData"/> with generated <see cref="Data"/>
+		/// Create instance of <see cref="SoundedData"/> with generated <see cref="Data"/>.
 		/// </summary>
-		/// <param name="packetSize"><see cref="Frame.PacketSize"/></param>
-		/// <param name="channelType"><see cref="Frame.ChannelType"/></param>
-		/// <param name="depth"><see cref="Frame.Depth"/></param>
-		/// <param name="upperLimit"><see cref="UpperLimit"/></param>
-		/// <param name="lowerLimit"><see cref="LowerLimit"/></param>
-		/// <returns>Instance of <see cref="SoundedData"/> with generated <see cref="Data"/></returns>
+		/// <param name="packetSize"><see cref="Frame.PacketSize"/>.</param>
+		/// <param name="channelType"><see cref="Frame.ChannelType"/>.</param>
+		/// <param name="depth"><see cref="Frame.Depth"/>.</param>
+		/// <param name="upperLimit"><see cref="UpperLimit"/>.</param>
+		/// <param name="lowerLimit"><see cref="LowerLimit"/>.</param>
+		/// <returns>Instance of <see cref="SoundedData"/> with generated <see cref="Data"/>.</returns>
 		public static SoundedData GenerateData(short packetSize, ChannelType channelType,
 			LinearDimension depth, LinearDimension upperLimit, LinearDimension lowerLimit)
 		{

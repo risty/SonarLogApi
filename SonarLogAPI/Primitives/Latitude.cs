@@ -2,6 +2,9 @@
 {
 	using System;
 
+	/// <summary>
+	/// Latitude position. South or North.
+	/// </summary>
 	public enum LatitudePosition : byte
 	{
 		South, North
@@ -17,11 +20,12 @@
 		/// </summary>
 		public LatitudePosition Position { get; set; }
 
+		/// <inheritdoc />
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		/// </summary>
 		/// <param name="degrees">The latitude of the location in deegrees. May range from -90.0 to 90.0.</param>
-		/// <exception cref = "T:System.ArgumentOutOfRangeException" />
+		/// <exception cref="ArgumentOutOfRangeException" />
 		public Latitude(double degrees) : base(degrees)
 		{
 			if (degrees < -90 || degrees > 90)
@@ -30,37 +34,39 @@
 			PositionSet(degrees);
 		}
 
+		/// <inheritdoc />
 		///  <summary>
 		///  Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		///  </summary>
 		///  <param name="degrees">Deegrees part of latitude. May range from -90.0 to 90.0.</param>
 		/// <param name="minutes">Minutes part of latitude. May range from 0 to 60.0.</param>
-		/// <exception cref = "T:System.ArgumentOutOfRangeException" />
+		/// <exception cref="ArgumentOutOfRangeException" />
 		public Latitude(double degrees, double minutes) : base(degrees, minutes)
 		{
 			PositionSet(degrees);
 		}
 
+		/// <inheritdoc />
 		///  <summary>
 		///  Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		///  </summary>
 		///  <param name="degrees">Deegrees part of <see cref="Latitude" />. May range from -90.0 to 90.0.</param>
 		/// <param name="minutes">Minutes part of <see cref="Latitude" />. May range from 0 to 60.0.</param>
 		/// <param name="seconds">Seconds part of <see cref="Latitude" />. May range from 0 to 60.0.</param>
-		/// <exception cref = "T:System.ArgumentOutOfRangeException" />
+		/// <exception cref="T:System.ArgumentOutOfRangeException" />
 		public Latitude(double degrees, double minutes, double seconds) : base(degrees, minutes, seconds)
 		{
 			PositionSet(degrees);
 		}
 
 		/// <summary>
-		/// Returns <see cref="Latitude" /> coordinate with Position, converted to Degrees double value
+		/// Returns <see cref="Latitude" /> coordinate with Position, converted to Degrees double value.
 		/// </summary>
-		/// <param name="degrees">Latitude degrees</param>
-		/// <param name="minutes">Latitude minutes</param>
-		/// <param name="seconds">Latitude seconds</param>
-		/// <param name="position">Latitude position</param>
-		/// <returns>Degrees double value</returns>
+		/// <param name="degrees">Latitude degrees.</param>
+		/// <param name="minutes">Latitude minutes.</param>
+		/// <param name="seconds">Latitude seconds.</param>
+		/// <param name="position">Latitude position.</param>
+		/// <returns>Degrees double value.</returns>
 		public static double ToDegrees(double degrees, double minutes, double seconds, LatitudePosition position)
 		{
 			var toDouble = Math.Abs(degrees) + minutes / 60 + seconds / 3600;
@@ -69,10 +75,11 @@
 				: toDouble * -1;
 		}
 
+		/// <inheritdoc />
 		/// <summary>
-		/// Returns <see cref="Latitude" /> coordinate, converted to Degrees double value
+		/// Returns <see cref="T:SonarLogAPI.Primitives.Latitude" /> coordinate, converted to Degrees double value
 		/// </summary>
-		/// <returns>Degrees double value</returns>
+		/// <returns>Degrees double value.</returns>
 		public override double ToDegrees()
 		{
 			return Position == LatitudePosition.North
@@ -84,7 +91,7 @@
 		/// Initializes a new instance of the <see cref="Latitude" /> class from degrees value.
 		/// </summary>
 		/// <param name="degreesValue">Degrees value.</param>
-		/// <returns>Instance of the <see cref="Latitude" /></returns>
+		/// <returns>Instance of the <see cref="Latitude" />.</returns>
 		public static Latitude FromDegrees(double degreesValue)
 		{
 			return new Latitude(degreesValue);
@@ -94,18 +101,18 @@
 		/// Initializes a new instance of the <see cref="Latitude" /> class from radians value.
 		/// </summary>
 		/// <param name="radiansValue">Radians value.</param>
-		/// <returns>Instance of the <see cref="Latitude" /></returns>
+		/// <returns>Instance of the <see cref="Latitude" />.</returns>
 		public static Latitude FromRadians(double radiansValue)
 		{
 			return new Latitude(radiansValue * 180d / Math.PI);
 		}
 
 		/// <summary>
-		/// Converts the string representation of <see cref="Latitude" /> degrees value to Latitude object
+		/// Converts the string representation of <see cref="Latitude" /> degrees value to Latitude object.
 		/// </summary>
-		/// <param name="stringvalue">String representation of Latitude degrees value</param>
-		/// <param name="latitude"><see cref="Latitude" /> object</param>
-		/// <returns>Conversion successed or failed</returns>
+		/// <param name="stringvalue">String representation of Latitude degrees value.</param>
+		/// <param name="latitude"><see cref="Latitude" /> object.</param>
+		/// <returns>Conversion successed or failed.</returns>
 		public static bool TryParse(string stringvalue, out Latitude latitude)
 		{
 			var isSuccessParse = double.TryParse(stringvalue, out var result);

@@ -86,8 +86,8 @@
 		{
 			if (reader.BaseStream.Length < headerFirstByteOffset + Lenght)
 				throw new ArgumentException("Stream length less then "
-				                            + nameof(headerFirstByteOffset) + " + Header " + nameof(Lenght));
-			
+											+ nameof(headerFirstByteOffset) + "+ " + nameof(Header) + " " + nameof(Lenght));
+
 			//seeking to header first byte
 			reader.BaseStream.Seek(headerFirstByteOffset, SeekOrigin.Begin);
 
@@ -106,7 +106,7 @@
 		/// </summary>
 		/// <param name="writer"><see cref="BinaryWriter"/>.</param>
 		/// <param name="headerToWrite"><see cref="SonarLogAPI.Lowrance.Header"/> object to write.</param>
-		/// <param name="headerFirstByteOffset">Offset of <see cref="SonarLogAPI.Lowrance.Header"/> first byte</param>
+		/// <param name="headerFirstByteOffset">Offset of <see cref="SonarLogAPI.Lowrance.Header"/> first byte.</param>
 		public static void WriteHeader(BinaryWriter writer, Header headerToWrite, long headerFirstByteOffset)
 		{
 			//seeking to header first byte
@@ -117,7 +117,7 @@
 			writer.Write(headerToWrite.BlockSize);
 			//write zero from current position to lenght position
 			while (writer.BaseStream.Position < headerFirstByteOffset + Lenght)
-			writer.Write(new byte());
+				writer.Write(new byte());
 		}
 
 		public override string ToString()

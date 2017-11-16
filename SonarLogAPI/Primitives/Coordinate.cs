@@ -6,7 +6,7 @@ namespace SonarLogAPI.Primitives
 	using System.Globalization;
 
 	/// <summary>
-	/// Abstract class, representing geographical <see cref="SonarLogAPI.Primitives.Coordinate" />.
+	/// Abstract class, representing geographical <see cref="Coordinate" />.
 	/// </summary>
 	public abstract class Coordinate : IEquatable<Coordinate>
 	{
@@ -14,13 +14,14 @@ namespace SonarLogAPI.Primitives
 		private double _seconds;
 
 		/// <summary>
-		/// Degrees part of geographical <see cref="SonarLogAPI.Primitives.Coordinate" />.
+		/// Degrees part of geographical <see cref="Coordinate" />.
 		/// </summary>
 		public double Degrees { get; set; }
 
 		/// <summary>
-		/// Minutes part of geographical <see cref="SonarLogAPI.Primitives.Coordinate" />.
+		/// Minutes part of geographical <see cref="Coordinate" />.
 		/// </summary>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		public double Minutes
 		{
 			get => _minutes;
@@ -34,8 +35,9 @@ namespace SonarLogAPI.Primitives
 		}
 
 		/// <summary>
-		/// Seconds part of geographical <see cref="SonarLogAPI.Primitives.Coordinate" />.
+		/// Seconds part of geographical <see cref="Coordinate" />.
 		/// </summary>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		public double Seconds
 		{
 			get => _seconds;
@@ -49,9 +51,9 @@ namespace SonarLogAPI.Primitives
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.Coordinate" /> class from <see cref="Degrees" /> value.
+		/// Initializes a new instance of the <see cref="Coordinate" /> class from <see cref="Degrees" /> value.
 		/// </summary>
-		/// <param name="value"><see cref="Degrees" /> value</param>
+		/// <param name="value"><see cref="Degrees" /> value.</param>
 		protected Coordinate(double value)
 		{
 			var absValue = Math.Abs(value);
@@ -63,10 +65,11 @@ namespace SonarLogAPI.Primitives
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.Coordinate" /> class from <see cref="Degrees" /> and <see cref="Minutes" /> value.
+		/// Initializes a new instance of the <see cref="Coordinate" /> class from <see cref="Degrees" /> and <see cref="Minutes" /> value.
 		/// </summary>
 		/// <param name="degrees"><see cref="Degrees" /> value.</param>
 		/// <param name="minutes"><see cref="Minutes" /> value.</param>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		protected Coordinate(double degrees, double minutes)
 		{
 			Degrees = Math.Abs(degrees);
@@ -79,11 +82,12 @@ namespace SonarLogAPI.Primitives
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.Coordinate" /> class from <see cref="Degrees" />, <see cref="Minutes" /> and <see cref="Seconds" /> value.
+		/// Initializes a new instance of the <see cref="Coordinate" /> class from <see cref="Degrees" />, <see cref="Minutes" /> and <see cref="Seconds" /> value.
 		/// </summary>
 		/// <param name="degrees"><see cref="Degrees" /> value.</param>
 		/// <param name="minutes"><see cref="Minutes" /> value.</param>
 		/// <param name="seconds"><see cref="Seconds" /></param>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		protected Coordinate(double degrees, double minutes, double seconds)
 		{
 			Degrees = Math.Abs(degrees);
@@ -100,12 +104,12 @@ namespace SonarLogAPI.Primitives
 		}
 
 		/// <summary>
-		/// Split double value to integer part and fraction part, converted to 60 decimal calculus
+		/// Split double value to integer part and fraction part, converted to 60 decimal calculus.
 		/// </summary>
-		/// <param name="value">Double value of Degrees or Minutes</param>
-		/// <param name="fraction">fraction part, converted to 60 decimal calculus</param>
+		/// <param name="value">Double value of Degrees or Minutes.</param>
+		/// <param name="fraction">Fraction part, converted to 60 decimal calculus.</param>
 		/// <returns>Integer part if value</returns>
-		private static int FromDoubleToIntAndFractionIn60ThSystem (double value, out double fraction)
+		private static int FromDoubleToIntAndFractionIn60ThSystem(double value, out double fraction)
 		{
 			var integerPart = (int)value;
 			fraction = (value - integerPart) * 60;
@@ -155,7 +159,7 @@ namespace SonarLogAPI.Primitives
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0}º {1}' {2}\"", Degrees, Minutes,Seconds);
+			return string.Format(CultureInfo.InvariantCulture, "{0}º {1}' {2}\"", Degrees, Minutes, Seconds);
 			//return $"{Degrees}º {Minutes}' {Seconds}\"";
 		}
 	}

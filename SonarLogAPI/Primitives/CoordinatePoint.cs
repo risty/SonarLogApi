@@ -7,7 +7,7 @@
 	//?
 
 	/// <summary>
-	/// Represents a geographical location point that is determined by <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> coordinates.
+	/// Represents a geographical location point that is determined by <see cref="Primitives.Latitude" /> and <see cref="Primitives.Longitude" /> coordinates.
 	/// </summary>
 	public class CoordinatePoint : IEquatable<CoordinatePoint>
 	{
@@ -36,10 +36,10 @@
 		public Longitude Longitude { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> class 
-		/// from <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> objects.
+		/// Initializes a new instance of the <see cref="CoordinatePoint" /> class 
+		/// from <see cref="Primitives.Latitude" /> and <see cref="Primitives.Longitude" /> objects.
 		/// </summary>
-		/// <param name="latitude"><see cref="SonarLogAPI.Primitives.Latitude" /></param>
+		/// <param name="latitude"><see cref="Primitives.Latitude" /></param>
 		/// <param name="longitude"><see cref="SonarLogAPI.Primitives.Longitude" /></param>
 		public CoordinatePoint(Latitude latitude, Longitude longitude)
 		{
@@ -48,24 +48,24 @@
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> class 
-		/// from <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> degrees values.
+		/// Initializes a new instance of the <see cref="CoordinatePoint" /> class 
+		/// from <see cref="Primitives.Latitude" /> and <see cref="Primitives.Longitude" /> degrees values.
 		/// </summary>
-		/// <param name="latitude"><see cref="SonarLogAPI.Primitives.Latitude" /> degrees value.</param>
-		/// <param name="longitude"><see cref="SonarLogAPI.Primitives.Longitude" /> degrees value.</param>
+		/// <param name="latitude"><see cref="Primitives.Latitude" /> degrees value.</param>
+		/// <param name="longitude"><see cref="Primitives.Longitude" /> degrees value.</param>
 		public CoordinatePoint(double latitude, double longitude)
 			: this(new Latitude(latitude), new Longitude(longitude)) { }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> class
-		/// from <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> degrees, minutes and seconds values.
+		/// Initializes a new instance of the <see cref="CoordinatePoint" /> class
+		/// from <see cref="Primitives.Latitude" /> and <see cref="Primitives.Longitude" /> degrees, minutes and seconds values.
 		/// </summary>
-		/// <param name="latitudeDegrees"><see cref="SonarLogAPI.Primitives.Latitude" /> Degrees</param>
-		/// <param name="latitudeMinutes"><see cref="SonarLogAPI.Primitives.Latitude" /> Minutes</param>
-		/// <param name="latitudeSeconds"><see cref="SonarLogAPI.Primitives.Latitude" /> Seconds</param>
-		/// <param name="longitudeDegrees"><see cref="SonarLogAPI.Primitives.Longitude" /> Degrees</param>
-		/// <param name="longitudeMinutes"><see cref="SonarLogAPI.Primitives.Longitude" /> Minutes</param>
-		/// <param name="longitudeSeconds"><see cref="SonarLogAPI.Primitives.Longitude" /> Seconds</param>
+		/// <param name="latitudeDegrees"><see cref="Primitives.Latitude" /> Degrees</param>
+		/// <param name="latitudeMinutes"><see cref="Primitives.Latitude" /> Minutes</param>
+		/// <param name="latitudeSeconds"><see cref="Primitives.Latitude" /> Seconds</param>
+		/// <param name="longitudeDegrees"><see cref="Primitives.Longitude" /> Degrees</param>
+		/// <param name="longitudeMinutes"><see cref="Primitives.Longitude" /> Minutes</param>
+		/// <param name="longitudeSeconds"><see cref="Primitives.Longitude" /> Seconds</param>
 		public CoordinatePoint(double latitudeDegrees, double latitudeMinutes, double latitudeSeconds,
 			double longitudeDegrees, double longitudeMinutes, double longitudeSeconds)
 			: this(new Latitude(latitudeDegrees, latitudeMinutes, latitudeSeconds), new Longitude(longitudeDegrees, longitudeMinutes, longitudeSeconds)) { }
@@ -83,20 +83,20 @@
 		}
 
 		/// <summary>
-		/// Determines whether two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects refer to the same location.
+		/// Determines whether two <see cref="CoordinatePoint" /> objects refer to the same location.
 		/// </summary>
-		/// <param name="left">The first <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to compare.</param>
-		/// <param name="right">The second <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to compare.</param>
-		/// <returns>true, if the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects are determined to be equivalent; otherwise, false.</returns>
+		/// <param name="left">The first <see cref="CoordinatePoint" /> to compare.</param>
+		/// <param name="right">The second <see cref="CoordinatePoint" /> to compare.</param>
+		/// <returns>true, if the <see cref="CoordinatePoint" /> objects are determined to be equivalent; otherwise, false.</returns>
 		public static bool operator ==(CoordinatePoint left, CoordinatePoint right)
 		{
 			return (object)left != null && (object)right != null && left.Equals(right);
 		}
 
-		/// <summary>Determines whether two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects correspond to different locations.</summary>
-		/// <param name="left">The first <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to compare.</param>
-		/// <param name="right">The second <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to compare.</param>
-		/// <returns>true, if the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects are determined to be different; otherwise, false.</returns>
+		/// <summary>Determines whether two <see cref="CoordinatePoint" /> objects correspond to different locations.</summary>
+		/// <param name="left">The first <see cref="CoordinatePoint" /> to compare.</param>
+		/// <param name="right">The second <see cref="CoordinatePoint" /> to compare.</param>
+		/// <returns>true, if the <see cref="CoordinatePoint" /> objects are determined to be different; otherwise, false.</returns>
 		public static bool operator !=(CoordinatePoint left, CoordinatePoint right)
 		{
 			return !(left == right);
@@ -104,11 +104,11 @@
 
 
 		/// <summary>
-		/// Determines if a specified <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> 
-		/// is equal to the current <see cref="SonarLogAPI.Primitives.CoordinatePoint" />.
+		/// Determines if a specified <see cref="CoordinatePoint" /> 
+		/// is equal to the current <see cref="CoordinatePoint" />.
 		/// </summary>
-		/// <param name="obj">The object to compare the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> to.</param>
-		/// <returns>True, if the <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> objects are equal; otherwise, false.</returns>
+		/// <param name="obj">The object to compare the <see cref="CoordinatePoint" /> to.</param>
+		/// <returns>True, if the <see cref="CoordinatePoint" /> objects are equal; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			var item = obj as CoordinatePoint;
@@ -128,12 +128,12 @@
 		#region Direct and inverse problem on the flat
 
 		/// <summary>
-		/// Get <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at distance and direction on the flat.
+		/// Get <see cref="CoordinatePoint" /> at distance and direction on the flat.
 		/// </summary>
-		/// <param name="basePoint">Source <see cref="SonarLogAPI.Primitives.CoordinatePoint" /></param>
+		/// <param name="basePoint">Source <see cref="CoordinatePoint"/></param>
 		/// <param name="distance">Distance to a new point.</param>
 		/// <param name="azimuth">Direction from one point to another in radians.</param>
-		/// <returns><see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at specified distance and direction from the given point.</returns>
+		/// <returns><see cref="CoordinatePoint"/> at specified distance and direction from the given point.</returns>
 		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionOnTheFlat(CoordinatePoint basePoint, LinearDimension distance, double azimuth)
 		{
 			var deltaLatitudeGrad = distance.GetMeters() * Math.Cos(azimuth) / (_earthWgs84MeanRadius * _d2R);
@@ -180,10 +180,10 @@
 		#region Get distance (inverse problem) at sphere with Haversine 
 
 		/// <summary>
-		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at sphere with WGS84 Mean Radius with Haversine formula.
+		/// Returns the distance between two <see cref="CoordinatePoint" /> at sphere with WGS84 Mean Radius with Haversine formula.
 		/// </summary>
-		/// <param name="firstPoint">First point</param>
-		/// <param name="secondPoint">Second point</param>
+		/// <param name="firstPoint">First point.</param>
+		/// <param name="secondPoint">Second point.</param>
 		/// <param name="altitude">Point altitude above surface. Zero by default.</param>
 		/// <returns>Distance between points.</returns>
 		/// <seealso cref="http://en.wikipedia.org/wiki/Great-circle_distance"/>
@@ -224,13 +224,13 @@
 		#region Direct and inverse problems on an ellipsoid
 
 		/// <summary>
-		/// Get <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at distance and direction on an ellipsoid.
+		/// Get <see cref="CoordinatePoint" /> at distance and direction on an ellipsoid.
 		/// </summary>
-		/// <param name="basePoint">Source <see cref="SonarLogAPI.Primitives.CoordinatePoint" /></param>
+		/// <param name="basePoint">Source <see cref="CoordinatePoint"/>.</param>
 		/// <param name="distance">Distance to a new point.</param>
 		/// <param name="azimuth">Azimuth to a new point.</param>
 		/// <param name="backAzimuth">Azimuth from a new point to base point.</param>
-		/// <returns><see cref="SonarLogAPI.Primitives.CoordinatePoint" /> at specified distance and direction from the base point.</returns>
+		/// <returns><see cref="CoordinatePoint" /> at specified distance and direction from the base point.</returns>
 		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(CoordinatePoint basePoint, LinearDimension distance, double azimuth, out double backAzimuth)
 		{
 			double deltaLatitude;
@@ -265,12 +265,12 @@
 		}
 
 		/// <summary>
-		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
+		/// Returns the distance between two <see cref="CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
 		/// </summary>
-		/// <param name="firstPoint">First point</param>
-		/// <param name="secondPoint">Second point</param>
+		/// <param name="firstPoint">First point.</param>
+		/// <param name="secondPoint">Second point.</param>
 		/// <param name="altitude">Point altitude above surface. Zero by default.</param>
-		/// <returns>Distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid</returns>
+		/// <returns>Distance between two <see cref="CoordinatePoint" /> on an ellipsoid.</returns>
 		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(CoordinatePoint firstPoint, CoordinatePoint secondPoint, double altitude = 0)
 		{
 			return GetDistanceBetweenPointsOnAnEllipsoid(firstPoint.Latitude.ToDegrees(),
@@ -278,14 +278,14 @@
 		}
 
 		/// <summary>
-		/// Returns the distance between two <see cref="SonarLogAPI.Primitives.CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
+		/// Returns the distance between two <see cref="CoordinatePoint" /> on an ellipsoid. Inverse Geodesics problem.
 		/// </summary>
-		/// <param name="lat1">First point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
-		/// <param name="long1">First point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
-		/// <param name="lat2">Second point <see cref="SonarLogAPI.Primitives.Latitude" /> degrees double value.</param>
-		/// <param name="long2">Second point <see cref="SonarLogAPI.Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="lat1">First point <see cref="Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long1">First point <see cref="Primitives.Longitude" /> degrees double value.</param>
+		/// <param name="lat2">Second point <see cref="Primitives.Latitude" /> degrees double value.</param>
+		/// <param name="long2">Second point <see cref="Primitives.Longitude" /> degrees double value.</param>
 		/// <param name="altitude">Point altitude above surface(meters). Zero by default.</param>
-		/// <returns>Distance between points</returns>
+		/// <returns>Distance between points.</returns>
 		/// <seealso cref="http://www.geogr.msu.ru/cafedra/karta/docs/GOK/gok_lecture_4.pdf"/>
 		/// <remarks>This method can return two azimuts to points.</remarks>
 		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(double lat1, double long1, double lat2, double long2, double altitude = 0)
@@ -298,18 +298,18 @@
 			double middleLongitudeRadians = (lat2 + lat1) * _d2R / 2;
 			double meridional = GetMeridionalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
 			double primeVertical = GetPrimeVerticalForLatitude(Latitude.FromRadians(middleLongitudeRadians));
-			double q = deltaLatitudeRadians * meridional * 
+			double q = deltaLatitudeRadians * meridional *
 				(1 - (2 * Math.Pow(deltaLongitudeRadians, 2d) + Math.Pow(deltaLongitudeRadians, 2d) * SinPow2(meridional)) / 24);
 			double p = deltaLongitudeRadians * primeVertical * Math.Cos(middleLongitudeRadians) *
-			           (1 + (Math.Pow(deltaLatitudeRadians, 2d) - Math.Pow(deltaLongitudeRadians, 2d) * SinPow2(middleLongitudeRadians)) / 24);
+					   (1 + (Math.Pow(deltaLatitudeRadians, 2d) - Math.Pow(deltaLongitudeRadians, 2d) * SinPow2(middleLongitudeRadians)) / 24);
 
-			return LinearDimension.FromMeters(Math.Sqrt(Math.Pow(q,2d)+ Math.Pow(p, 2d)));
+			return LinearDimension.FromMeters(Math.Sqrt(Math.Pow(q, 2d) + Math.Pow(p, 2d)));
 		}
 
 		/// <summary>
 		/// Returns Meridional value for specified <see cref="Primitives.Latitude"/>.
 		/// </summary>
-		/// <param name="latitude"><see cref="Primitives.Latitude"/></param>
+		/// <param name="latitude"><see cref="Primitives.Latitude"/>.</param>
 		/// <returns>Meridional value for specified <see cref="Primitives.Latitude"/>.</returns>
 		/// <seealso cref="http://en.wikipedia.org/wiki/Earth_radius#Meridional"/>
 		private static double GetMeridionalForLatitude(Latitude latitude)
@@ -321,7 +321,7 @@
 		/// <summary>
 		/// Returns Prime vertical value for specified <see cref="Primitives.Latitude"/>.
 		/// </summary>
-		/// <param name="latitude"><see cref="Primitives.Latitude"/></param>
+		/// <param name="latitude"><see cref="Primitives.Latitude"/>.</param>
 		/// <returns>Prime vertical value for specified <see cref="Primitives.Latitude"/>.</returns>
 		/// <seealso cref="http://en.wikipedia.org/wiki/Earth_radius#Prime_vertical"/>
 		private static double GetPrimeVerticalForLatitude(Latitude latitude)
