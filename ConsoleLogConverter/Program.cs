@@ -52,6 +52,10 @@
 				 HelpText = "Makes output file GPS coordinates anonymous. Sets Latitude and Longitude to zero.")]
 			public bool CoordinatesDelete { get; set; }
 
+			[Option('l', "flip", Required = false, DefaultValue = false,
+				HelpText = "Flip SoundedData for SidescanComposite channel.")]
+			public bool FlipSoundedData { get; set; }
+
 			[Option('v', "verbose", DefaultValue = true,
 				 HelpText = "Prints all messages to standard output.")]
 			public bool Verbose { get; set; }
@@ -92,6 +96,8 @@
 				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substract and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and save frames to \"csv\" format.\n\n");
 				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -g 0:5:f -o sl2\"\n");
 				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it generate all(\"f\" option) the frames at 0th(Primary) channel from 5th(SidescanComposite) clannel and finally save frames from all input file channels to \"sl2\" format.\n\n");
+				text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -l -o sl2\"\n");
+				text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it flip sounded data in frames at 5th(SidescanComposite) clannel and finally save frames  to \"sl2\" format.\n\n");
 				return text;
 			}
 
@@ -342,11 +348,31 @@
 							Console.WriteLine("Unique points at source channel(s):{0}", unicueFrameFromSourceChanels.Count);
 							if (forceGenerate)
 								Console.WriteLine("Points erased at destination channel:{0}", erasedPointsCountAtDstChannel);
-							Console.WriteLine("Points added to destination channel:{0}", unicueFrameFromSourceChanels.Count - dstChannelFramesPoints.Count);
+							Console.WriteLine("Points added to destination channel:{0}\n", unicueFrameFromSourceChanels.Count - dstChannelFramesPoints.Count);
 						}
 					}
 				}
 
+
+				#endregion
+
+				#region Flip SoundedData
+
+				if (options.FlipSoundedData)
+				{
+					if (options.Verbose)
+					{
+						Console.WriteLine("Sounded Data flip option enabled.");
+						Console.WriteLine("Flipping data for SidescanComposite channel ...\n");
+					}
+
+					foreach (var frame in data.Frames)
+					{
+						//flip soubded data for SidescanComposite channel
+						if (frame.ChannelType == ChannelType.SidescanComposite)
+							frame.SoundedData = frame.SoundedData.FlipSoundedData();
+					}
+				}
 
 				#endregion
 

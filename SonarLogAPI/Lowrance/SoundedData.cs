@@ -47,6 +47,46 @@
 		}
 
 		/// <summary>
+		/// Flip <see cref="SoundedData"/> for SidescanComposite and ThreeD channels.
+		/// </summary>
+		/// <returns>Flipped <see cref="SoundedData"/>.</returns>
+		public SoundedData FlipSoundedData()
+		{
+			return FlipSoundedData(this);
+		}
+
+		/// <summary>
+		/// Flip <see cref="SoundedData"/> for SidescanComposite and ThreeD channels.
+		/// </summary>
+		/// <param name="soundedData">Inner <see cref="SoundedData"/>.</param>
+		/// <returns>Flipped <see cref="SoundedData"/>.</returns>
+		public static SoundedData FlipSoundedData(SoundedData soundedData)
+		{
+			switch (soundedData.ChannelType)
+			{
+				case ChannelType.Primary:
+				case ChannelType.Secondary:
+				case ChannelType.DownScan:
+				case ChannelType.SidescanLeft:
+				case ChannelType.SidescanRight:
+					//do nothing with sounded data of this channels
+					break;
+				case ChannelType.SidescanComposite:
+
+					//invert Data array and change upper and liwer limits values
+					return new SoundedData(soundedData.Data.Reverse().ToArray(), soundedData.ChannelType,
+						soundedData.LowerLimit * -1, soundedData.UpperLimit * -1);
+
+				case ChannelType.ThreeD:
+					throw new NotImplementedException();
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return soundedData;
+		}
+
+		/// <summary>
 		/// Create instance of <see cref="SoundedData"/> with generated <see cref="Data"/>
 		/// </summary>
 		/// <param name="packetSize"><see cref="Frame.PacketSize"/></param>
@@ -98,9 +138,9 @@
 					if (lowerLimit.GetMeters() < 0) throw new ArgumentOutOfRangeException(nameof(lowerLimit), lowerLimit, nameof(lowerLimit)
 				+ "cant be less then zero for " + channelType);
 
-					var sraightArrayForSidescanComposite = GetArrayForNoiseAndBottomSurfaces((short)(packetSize/2), depth, LinearDimension.FromMeters(0), lowerLimit);
+					var sraightArrayForSidescanComposite = GetArrayForNoiseAndBottomSurfaces((short)(packetSize / 2), depth, LinearDimension.FromMeters(0), lowerLimit);
 					var fullSidescan = new byte[packetSize];
-					sraightArrayForSidescanComposite.Reverse().ToArray().CopyTo(fullSidescan,0);
+					sraightArrayForSidescanComposite.Reverse().ToArray().CopyTo(fullSidescan, 0);
 					sraightArrayForSidescanComposite.CopyTo(fullSidescan, packetSize / 2);
 					return new SoundedData(fullSidescan, channelType, upperLimit, lowerLimit);
 

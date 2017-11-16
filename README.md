@@ -27,6 +27,11 @@ After that it generate 1th(Secondary) channel frames (even if frames with such c
 f - if specified generate frame in destination channel even if frame with such coordinates already exist;
 d - if specified generate sounded data from source frame depth value,(otherwise take sounded data from source frame).
 
+### Flip Sidescan view
+If you have confused with position of the transducer and fixed the back to the front, then you have got the reversed sidescan images. 
+You can fix it and flip it back.
+"**ConsoleLogConverter.exe -i input.sl2 -l -o sl2**"
+Command takes all frames from input.sl2. At the next step it flip sounded data in frames at 5th(SidescanComposite) clannel and finally save frames to "sl2" format.
 
 ### Research command example.
 SL binary formats are closed, and there is for all values no public schema . So, you can help to project and make some research by yourself.
