@@ -16,6 +16,7 @@
 		Foot
 	}
 
+	/// <inheritdoc />
 	/// <summary>
 	/// Linear dimension.
 	/// </summary>
@@ -24,15 +25,9 @@
 		//https://en.wikipedia.org/wiki/United_States_customary_units
 		private const double _metersInOneFoot = 0.3048;
 
-		/// <summary>
-		/// LinearDimension value.
-		/// </summary>
-		public double Value;
+		private readonly double _valueInMeters;
+		private readonly double _valueInFoots;
 
-		/// <summary>
-		/// LinearDimension value unit.
-		/// </summary>
-		public LinearDimensionUnit Unit;
 
 		/// <summary>
 		/// Create instance of <see cref="LinearDimension"/>.
@@ -41,72 +36,34 @@
 		/// <param name="unit"><see cref="LinearDimension"/> unit.</param>
 		public LinearDimension(double value, LinearDimensionUnit unit)
 		{
-			Value = value;
-			Unit = unit;
-		}
 
-		/// <summary>
-		/// Get <see cref="LinearDimension"/> value in meters.
-		/// </summary>
-		/// <param name="depth"><see cref="LinearDimension"/>.</param>
-		/// <returns><see cref="LinearDimension"/> value in meters.</returns>
-		/// <exception cref="ArgumentNullException"></exception>
-		public static double GetMeters(LinearDimension depth)
-		{
-			if (depth == null) throw new ArgumentNullException(nameof(depth));
+			switch (unit)
+			{
+				case LinearDimensionUnit.Meter:
+					_valueInMeters = value;
+					_valueInFoots = value * _metersInOneFoot;
+					break;
+				case LinearDimensionUnit.Foot:
+					_valueInFoots = value;
+					_valueInMeters = value / _metersInOneFoot;
+					break;
 
-			return depth.Unit == LinearDimensionUnit.Meter
-				? depth.Value
-				: depth.Value * _metersInOneFoot;
-		}
-
-		/// <summary>
-		/// Get <see cref="LinearDimension"/> value in foots.
-		/// </summary>
-		/// <param name="depth"><see cref="LinearDimension"/>.</param>
-		/// <returns><see cref="LinearDimension"/> value in foots.</returns>
-		/// <exception cref="ArgumentNullException"></exception>
-		public static double GetFoots(LinearDimension depth)
-		{
-			if (depth == null) throw new ArgumentNullException(nameof(depth));
-
-			return depth.Unit == LinearDimensionUnit.Foot
-				? depth.Value
-				: depth.Value / _metersInOneFoot;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(unit), unit, null);
+			}
 		}
 
 		/// <summary>
 		/// Get <see cref="LinearDimension"/> value in foots.
 		/// </summary>
 		/// <returns><see cref="LinearDimension"/> value in foots.</returns>
-		public double GetFoots()
-		{
-			return GetFoots(this);
-		}
+		public double GetFoots() => _valueInFoots;
 
 		/// <summary>
 		/// Get <see cref="LinearDimension"/> value in meters.
 		/// </summary>
 		/// <returns><see cref="LinearDimension"/>value in meters.</returns>
-		public double GetMeters()
-		{
-			return GetMeters(this);
-		}
-
-		/// <summary>
-		/// Convert <see cref="LinearDimension"/> object to depth object with value in meters.
-		/// </summary>
-		/// <param name="depth"><see cref="LinearDimension"/> object.</param>
-		/// <returns><see cref="LinearDimension"/> object with value in meters.</returns>
-		/// <exception cref="ArgumentNullException"></exception>
-		public static LinearDimension ToMeters(LinearDimension depth)
-		{
-			if (depth == null) throw new ArgumentNullException(nameof(depth));
-
-			return depth.Unit == LinearDimensionUnit.Meter
-				? depth
-				: new LinearDimension(GetMeters(depth), LinearDimensionUnit.Meter);
-		}
+		public double GetMeters() => _valueInMeters;
 
 		/// <summary>
 		/// Create <see cref="LinearDimension"/> object from value in meters
@@ -127,7 +84,6 @@
 		{
 			return new LinearDimension(foots, LinearDimensionUnit.Foot);
 		}
-
 
 		/// <summary>
 		/// Converts the string representation of LinearDimension value to <see cref="LinearDimension"/> object
@@ -154,6 +110,7 @@
 			return item != null && Equals(item);
 		}
 
+		/// <inheritdoc />
 		/// <summary>
 		/// Determines if a specified <see cref="LinearDimension" /> 
 		/// is equal to the current <see cref="LinearDimension" />.
@@ -224,7 +181,6 @@
 		public override string ToString()
 		{
 			return string.Format(CultureInfo.InvariantCulture, "{0:0.000 meters}", GetMeters());
-			//return $"{GetMeters():#.###}";
 		}
 	}
 }
