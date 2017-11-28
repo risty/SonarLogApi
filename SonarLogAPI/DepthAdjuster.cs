@@ -49,9 +49,9 @@
 		/// Ajust depth at <see cref="AdjustablePoints"/> async.
 		/// </summary>
 		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
-		public Task<IEnumerable<IDepthPointSource>> AdjustDepthAsync()
+		public async Task<IEnumerable<IDepthPointSource>> AdjustDepthAsync()
 		{
-			return Task.Run(() => AdjustDepth());
+			return await Task.Run(() => AdjustDepth());
 		}
 
 		/// <summary>
@@ -69,25 +69,53 @@
 				.Select(g => g.First())
 				.ToList();
 
-			var distance = new LinearDimension(double.MaxValue, LinearDimensionUnit.Meter);
-			Tuple<IDepthPointSource, IDepthPointSource> points = null;
+			var minDistance = double.MaxValue;
+			NearestPointsEventArgs minDistncePointsInfo = null;
 
 			Parallel.ForEach(uniqueBasePoints,
-			   uniqueBasePoint =>
-			   {
-				   foreach (var uniqueAdjustablePoint in uniqueAdjustablePoints)
-				   {
-					   var dim = CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(uniqueBasePoint.Point, uniqueAdjustablePoint.Point);
-					   if (dim < distance)
-					   {
-						   lock (_syncRoot)
-						   {
-							   distance = dim;
-							   points = new Tuple<IDepthPointSource, IDepthPointSource>(uniqueBasePoint, uniqueAdjustablePoint);
-						   }
-					   }
-				   }
-			   }
+				//creat local Points info
+				() => new NearestPointsEventArgs()
+				{
+					Distance = double.MaxValue
+				},
+
+				//each thread work
+				(uniqueBasePoint, loopState, singleThreadPointInfo) =>
+				{
+					//save first point
+					singleThreadPointInfo.FirstPoint = uniqueBasePoint;
+
+					foreach (var uniqueAdjustablePoint in uniqueAdjustablePoints)
+					{
+						var dim = CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(uniqueBasePoint.Point, uniqueAdjustablePoint.Point).GetMeters();
+
+						if (dim < singleThreadPointInfo.Distance)
+						{
+							singleThreadPointInfo.SecondPoint = uniqueAdjustablePoint;
+							singleThreadPointInfo.Distance = dim;
+						}
+
+						//if we found two points with distance less 0.1m between, then stop calc.
+						if (Math.Abs(singleThreadPointInfo.Distance) < 0.1d)
+							loopState.Stop();
+
+					}
+
+					return singleThreadPointInfo;
+				},
+				//composition
+				pointInfo =>
+				{
+					lock (_syncRoot)
+					{
+						if (pointInfo.Distance < minDistance)
+						{
+							minDistance = pointInfo.Distance;
+							minDistncePointsInfo = pointInfo;
+						}
+					}
+				}
+
 			);
 
 			//foreach (var uniqueBasePoint in uniqueBasePoints)
@@ -103,34 +131,24 @@
 			//	}
 			//}
 
-			var e = new NearestPointsEventArgs()
-			{
-				Distance = distance,
-				FirstPoint = points.Item1,
-				SecondPoint = points.Item2
-			};
+			OnNearestPointFound(minDistncePointsInfo);
 
-			OnNearestPointFound(e);
-
-			return e;
+			return minDistncePointsInfo;
 		}
 
 		/// <summary>
 		/// Ajust depth at sequence of points.
 		/// </summary>
-		/// <param name="innerSequence">Sequence of points to adjust depth.</param>
+		/// <param name="inputSequence">Sequence of points to adjust depth.</param>
 		/// <param name="ajustValue">Value to add to depth.</param>
 		/// <returns>Sequence of points after depth adjust.</returns>
-		private static IEnumerable<IDepthPointSource> AdjustDepth(IEnumerable<IDepthPointSource> innerSequence, LinearDimension ajustValue)
+		private static IEnumerable<IDepthPointSource> AdjustDepth(IEnumerable<IDepthPointSource> inputSequence, LinearDimension ajustValue)
 		{
-			var depthPointSources = innerSequence as IDepthPointSource[] ?? innerSequence.ToArray();
-
-			foreach (var depthPointSource in depthPointSources)
+			foreach (var inputPoint in inputSequence)
 			{
-				depthPointSource.Depth += ajustValue;
+				inputPoint.Depth += ajustValue;
+				yield return inputPoint;
 			}
-
-			return depthPointSources;
 		}
 
 		public event EventHandler<NearestPointsEventArgs> NearestPointsFound;
@@ -147,7 +165,9 @@
 		{
 			public IDepthPointSource FirstPoint;
 			public IDepthPointSource SecondPoint;
-			public LinearDimension Distance;
+
+			//distance in meters
+			public double Distance;
 		}
 	}
 }
