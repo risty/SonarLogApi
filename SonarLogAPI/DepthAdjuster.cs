@@ -62,12 +62,8 @@
 		/// <returns><see cref="NearestPointsEventArgs"/>.</returns>
 		private NearestPointsEventArgs FindNearestPoint(IEnumerable<IDepthPointSource> firstSequence, IEnumerable<IDepthPointSource> secondSequence)
 		{
-			var uniqueBasePoints = firstSequence.GroupBy(point => point.Point)
-				.Select(g => g.First())
-				.ToList();
-			var uniqueAdjustablePoints = secondSequence.GroupBy(point => point.Point)
-				.Select(g => g.First())
-				.ToList();
+			var uniqueBasePoints = firstSequence.GetUniqueDepthPoints();
+			var uniqueAdjustablePoints = secondSequence.GetUniqueDepthPoints();
 
 			var minDistance = double.MaxValue;
 			NearestPointsEventArgs minDistncePointsInfo = null;

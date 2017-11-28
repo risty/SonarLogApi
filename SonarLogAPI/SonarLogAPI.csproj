@@ -41,6 +41,7 @@
     <Compile Include="DepthAdjuster.cs" />
     <Compile Include="Primitives\Coordinate.cs" />
     <Compile Include="Primitives\CoordinatePoint.cs" />
+    <Compile Include="Primitives\Extensions.cs" />
     <Compile Include="Primitives\ICoordinatePointSource.cs" />
     <Compile Include="Primitives\ITemperaturePointSource.cs" />
     <Compile Include="Primitives\LinearDimension.cs" />

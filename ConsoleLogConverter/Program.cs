@@ -551,30 +551,10 @@
 							{
 								CreationDateTime = DateTimeOffset.Now,
 								Name = "CVSLogData object",
-								Points = new List<CsvLogEntry>()
+								
+								//grouping points by coordinate and take point with average depth
+								Points = newFrames.GetUniqueDepthPoints()
 							};
-
-							//and fill Points list
-							foreach (var frame in newFrames)
-							{
-								cvsData.Points.Add(new CsvLogEntry(frame));
-							}
-
-							//func for getting point with average depth from group
-							CsvLogEntry GetAveragePointFromGroup(IGrouping<CoordinatePoint, CsvLogEntry> points)
-							{
-								var averageDepthInMeters = points.Average(pnt => pnt.Depth.GetMeters());
-								return new CsvLogEntry
-								{
-									Depth = LinearDimension.FromMeters(averageDepthInMeters),
-									Point = points.Key
-								};
-							}
-
-							//grouping points by coordinate and take point with aver
-							cvsData.Points = cvsData.Points.GroupBy(point => point.Point)
-								.Select(GetAveragePointFromGroup)
-								.ToList();
 
 							//writing points to file
 							try
@@ -587,7 +567,7 @@
 									CsvLogData.WriteToStream(stream, cvsData);
 
 									stopWatch.Stop();
-									Console.WriteLine("{0} points writing complete.  Writing time: {1} \n", cvsData.Points.Count, stopWatch.Elapsed);
+									Console.WriteLine("{0} points writing complete.  Writing time: {1} \n", cvsData.Points.Count(), stopWatch.Elapsed);
 									stopWatch.Reset();
 								}
 							}
