@@ -1,6 +1,7 @@
 ﻿namespace SonarLogAPI.Primitives
 {
 	using System;
+	using System.Globalization;
 
 	/// <summary>
 	/// Longitude position. West or East.
@@ -117,7 +118,7 @@
 		/// <returns>Conversion successed or failed.</returns>
 		public static bool TryParse(string stringvalue, out Longitude latitude)
 		{
-			var isSuccessParse = double.TryParse(stringvalue, out var result);
+			var isSuccessParse = double.TryParse(stringvalue, NumberStyles.Any, CultureInfo.InvariantCulture, out var result);
 
 			latitude = null;
 			if (isSuccessParse)

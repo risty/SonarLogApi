@@ -22,40 +22,34 @@
 			Header secondHeader;
 
 			var testDir = TestContext.CurrentContext.TestDirectory;
-			var solutionDir = Path.GetDirectoryName(Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory));
+			var solutionDir = Path.GetDirectoryName(Path.GetDirectoryName(testDir));
 
-			var fromStream = new FileStream
-				(solutionDir + @"\input.sl2", FileMode.Open, FileAccess.Read);
-
-			using (var reader = new BinaryReader(fromStream))
+			using (var fromStream = new FileStream(solutionDir + @"\input.sl2", FileMode.Open, FileAccess.Read))
 			{
-				firstHeader = Header.ReadHeader(reader, 0);
+				using (var reader = new BinaryReader(fromStream))
+				{
+					firstHeader = Header.ReadHeader(reader, 0);
+				}
+
 			}
 
-			fromStream.Close();
-			fromStream.Dispose();
-
-			var toStream = new FileStream
-				(testDir + @"\toHeader.sl2", FileMode.Create, FileAccess.Write);
-
-			using (var writer = new BinaryWriter(toStream))
+			using (var toStream = new FileStream(testDir + @"\toHeader.sl2", FileMode.Create, FileAccess.Write))
 			{
-				Header.WriteHeader(writer, firstHeader, 0);
+				using (var writer = new BinaryWriter(toStream))
+				{
+					Header.WriteHeader(writer, firstHeader, 0);
+				}
+
 			}
 
-			toStream.Close();
-			toStream.Dispose();
-
-			var fromStream2 = new FileStream
-				(testDir + @"\toHeader.sl2", FileMode.Open, FileAccess.Read);
-
-			using (var reader = new BinaryReader(fromStream2))
+			using (var fromStream2 = new FileStream(testDir + @"\toHeader.sl2", FileMode.Open, FileAccess.Read))
 			{
-				secondHeader = Header.ReadHeader(reader, 0);
-			}
+				using (var reader = new BinaryReader(fromStream2))
+				{
+					secondHeader = Header.ReadHeader(reader, 0);
+				}
 
-			fromStream2.Close();
-			fromStream2.Dispose();
+			}
 
 			Assert.AreEqual(firstHeader.FileVersion, secondHeader.FileVersion);
 			Assert.AreEqual(firstHeader.HardwareVersion, secondHeader.HardwareVersion);
