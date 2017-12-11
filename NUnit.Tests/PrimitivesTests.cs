@@ -4,6 +4,7 @@
 namespace NUnit.Tests
 {
 	using System;
+	using System.Globalization;
 
 	using SonarLogAPI.Localization;
 	using SonarLogAPI.Primitives;
@@ -76,9 +77,7 @@ namespace NUnit.Tests
 		[Test(TestOf = typeof(Latitude))]
 		public void LatitudeParceTest()
 		{
-			Latitude latitude;
-
-			var res = Latitude.TryParse(_northLatitudeDegrees.ToString(), out latitude);
+			var res = Latitude.TryParse(_northLatitudeDegrees.ToString(CultureInfo.InvariantCulture), out var latitude);
 			Assert.IsTrue(res);
 			Assert.IsTrue(northLatitude.Equals(latitude));
 			Assert.IsFalse(northLatitude == latitude);
@@ -128,9 +127,7 @@ namespace NUnit.Tests
 		[Test(TestOf = typeof(Longitude))]
 		public void LongitudeParceTest()
 		{
-			Longitude longitude;
-
-			var result = Longitude.TryParse(_westLongitudeDouble.ToString(), out longitude);
+			var result = Longitude.TryParse(_westLongitudeDouble.ToString(CultureInfo.InvariantCulture), out var longitude);
 			Assert.IsTrue(result);
 			Assert.IsTrue(westLongitude.Equals(longitude));
 			Assert.IsFalse(westLongitude == longitude);
@@ -208,14 +205,13 @@ namespace NUnit.Tests
 			var baseCoordinatePoint = new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.719));
 
 			//expected values takes from HDS Gen3
-			double backAzimuth;
-			var point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70, out backAzimuth);
+			var point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70, out _);
 			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.722)), point1);
 
-			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71, out backAzimuth);
+			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71, out _);
 			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.731)), point1);
 
-			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88, out backAzimuth);
+			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88, out _);
 			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.825)), point1);
 
 		}
@@ -225,6 +221,19 @@ namespace NUnit.Tests
 	[TestFixture(Author = ProjectDescriptions.Company)]
 	public class LinearDimensionTests
 	{
+		[Test(TestOf = typeof(LinearDimension))]
+		public void LinearDimensionCreationTest()
+		{
+			//45 foots == 13.716 meters
+			var depth1 = new LinearDimension(45, LinearDimensionUnit.Foot);
+			Assert.AreEqual(13.716, depth1.GetMeters(), 0.001);
+
+			//20 meters == 13.761 meters
+			var depth2 = new LinearDimension(20, LinearDimensionUnit.Meter);
+			Assert.AreEqual(65.61679, depth2.GetFoots(), 0.001);
+		}
+
+
 		[Test(TestOf = typeof(LinearDimension))]
 		public void LinearDimensionEqualTest()
 		{
@@ -259,35 +268,33 @@ namespace NUnit.Tests
 		{
 			var julianDay = new DateTimeOffset(2017, 09, 16, 00, 00, 00, TimeSpan.Zero);
 
-			double[] fields;
-
 			//expected values from windows gui app https://www.ngdc.noaa.gov/geomag/WMM/wmm_gdownload.shtml
 			var lat1 = 60 * _toRadians;
 			var lon1 = 30 * _toRadians;
 			var point1ExpectedDecination = 10.65 * _toRadians;
 			Assert.AreEqual(point1ExpectedDecination,
-				MagneticVariation.GetMagneticVariation(lat1, lon1, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+				MagneticVariation.GetMagneticVariation(lat1, lon1, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out _), 0.0001d);
 
 			var lat2 = -30 * _toRadians;
 			var lon2 = 130 * _toRadians;
 			var point2ExpectedDecination = 3.95 * _toRadians;
 
 			Assert.AreEqual(point2ExpectedDecination,
-				MagneticVariation.GetMagneticVariation(lat2, lon2, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+				MagneticVariation.GetMagneticVariation(lat2, lon2, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out _), 0.0001d);
 
 			var lat3 = 40 * _toRadians;
 			var lon3 = -70 * _toRadians;
 			var point3ExpectedDecination = -14.5 * _toRadians;
 
 			Assert.AreEqual(point3ExpectedDecination,
-				MagneticVariation.GetMagneticVariation(lat3, lon3, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+				MagneticVariation.GetMagneticVariation(lat3, lon3, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out _), 0.0001d);
 
 			var lat4 = -50 * _toRadians;
 			var lon4 = -170 * _toRadians;
 			var point4ExpectedDecination = 31.04 * _toRadians;
 
 			Assert.AreEqual(point4ExpectedDecination,
-				MagneticVariation.GetMagneticVariation(lat4, lon4, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out fields), 0.0001d);
+				MagneticVariation.GetMagneticVariation(lat4, lon4, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out _), 0.0001d);
 		}
 	}
 

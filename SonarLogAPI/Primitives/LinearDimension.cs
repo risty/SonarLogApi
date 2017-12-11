@@ -41,11 +41,11 @@
 			{
 				case LinearDimensionUnit.Meter:
 					_valueInMeters = value;
-					_valueInFoots = value * _metersInOneFoot;
+					_valueInFoots = value / _metersInOneFoot;
 					break;
 				case LinearDimensionUnit.Foot:
 					_valueInFoots = value;
-					_valueInMeters = value / _metersInOneFoot;
+					_valueInMeters = value * _metersInOneFoot;
 					break;
 
 				default:
@@ -94,7 +94,7 @@
 		/// <returns></returns>
 		public static bool TryParse(string stringvalue, LinearDimensionUnit depthUnit, out LinearDimension depth)
 		{
-			var isSuccessParse = double.TryParse(stringvalue, out var result);
+			var isSuccessParse = double.TryParse(stringvalue, NumberStyles.Any, CultureInfo.InvariantCulture, out var result);
 
 			depth = null;
 			if (isSuccessParse)
@@ -125,7 +125,8 @@
 			//Check whether the compared object references the same data. 
 			if (ReferenceEquals(this, other)) return true;
 
-			return GetMeters().Equals(other.GetMeters());
+			//checks meters
+			return Math.Abs(GetMeters() - other.GetMeters()) < 1E-13 ;
 		}
 
 		public override int GetHashCode()
