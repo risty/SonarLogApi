@@ -143,8 +143,7 @@ namespace SonarLogAPI.Primitives
 			if (ReferenceEquals(this, other)) return true;
 
 			//Check whether the products' properties are equal. 
-			return Degrees.Equals(other.Degrees)
-				&& Minutes.Equals(other.Minutes) && Seconds.Equals(other.Seconds);
+			return Math.Abs(ToDegrees() - other.ToDegrees()) < 1E-13;
 		}
 
 		public override bool Equals(object obj)
