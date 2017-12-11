@@ -39,7 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleLogConverterTests.cs" />
-    <Compile Include="CVSTests.cs" />
+    <Compile Include="CSVTests.cs" />
     <Compile Include="LowranceTests.cs" />
     <Compile Include="PrimitivesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 
-	using Primitives;	
+	using Primitives;
 
 	/// <summary>
 	/// The log entry, consists of Latitude, Longitude and Depth, separated by comma
@@ -25,7 +25,7 @@
 		/// Log entry values, expect <see cref="SonarLogAPI.Primitives.Latitude" />, <see cref="SonarLogAPI.Primitives.Longitude" /> and Depth
 		/// </summary>
 		public List<string> UnexpectedValues { get; set; }
-		
+
 		/// <summary>
 		/// CvsLogEntry default constructor
 		/// </summary>
@@ -71,7 +71,7 @@
 		/// <param name="longitude">Longitude degrees double value</param>
 		/// <param name="depth">Depth double value</param>
 		/// <param name="depthUnit">Depth value unit</param>
-		public CsvLogEntry(double latitude, double longitude, double depth, LinearDimensionUnit depthUnit) 
+		public CsvLogEntry(double latitude, double longitude, double depth, LinearDimensionUnit depthUnit)
 			: this(new Latitude(latitude), new Longitude(longitude), new LinearDimension(depth, depthUnit)) { }
 
 		/// <summary>
@@ -83,7 +83,7 @@
 		/// <param name="valuesOrder">Represent order of CvsLogEntry properties in string</param>
 		/// <param name="result">CvsLogEntry</param>
 		/// <returns>Conversion successed or failed</returns>
-		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, Dictionary<int,string> valuesOrder, out CsvLogEntry result)
+		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, Dictionary<int, string> valuesOrder, out CsvLogEntry result)
 		{
 			result = new CsvLogEntry { UnexpectedValues = new List<string>() };
 
@@ -91,7 +91,7 @@
 			Longitude lon = null;
 			LinearDimension dpt = null;
 			var values = cvsLogEntryString.Split(charForSplit);
-			
+
 			// if string does't contanes values or values count less then expect return false
 			if (values.Length == 0 || values.Length < valuesOrder.Count)
 				return false;
@@ -100,21 +100,24 @@
 			{
 				if (i < valuesOrder.Count)
 				{
-					if (valuesOrder[i].Contains("Latitude"))
+					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
+						"Latitude", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = Latitude.TryParse(values[i], out lat);
 						if (!parceresult)
 							return false;
 					}
 
-					if (valuesOrder[i].Contains("Longitude"))
+					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
+							"Longitude", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = Longitude.TryParse(values[i], out lon);
 						if (!parceresult)
 							return false;
 					}
 
-					if (valuesOrder[i].Contains("Depth"))
+					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
+							"Depth", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = LinearDimension.TryParse(values[i], depthUnit, out dpt);
 						if (!parceresult)
