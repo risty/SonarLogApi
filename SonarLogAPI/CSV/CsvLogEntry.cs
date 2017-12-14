@@ -11,11 +11,13 @@
 	/// </summary>
 	public class CsvLogEntry : IDepthPointSource, IEquatable<CsvLogEntry>
 	{
+		/// <inheritdoc />
 		/// <summary>
-		/// Represents a geographical location point that is determined by <see cref="SonarLogAPI.Primitives.Latitude" /> and <see cref="SonarLogAPI.Primitives.Longitude" /> coordinates.
+		/// Represents a geographical location point that is determined by <see cref="T:SonarLogAPI.Primitives.Latitude" /> and <see cref="T:SonarLogAPI.Primitives.Longitude" /> coordinates.
 		/// </summary>
 		public CoordinatePoint Point { get; set; }
 
+		/// <inheritdoc />
 		/// <summary>
 		/// Water depth at point
 		/// </summary>
@@ -83,7 +85,7 @@
 		/// <param name="valuesOrder">Represent order of CvsLogEntry properties in string</param>
 		/// <param name="result">CvsLogEntry</param>
 		/// <returns>Conversion successed or failed</returns>
-		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, Dictionary<int, string> valuesOrder, out CsvLogEntry result)
+		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, IDictionary<int, string> valuesOrder, out CsvLogEntry result)
 		{
 			result = new CsvLogEntry { UnexpectedValues = new List<string>() };
 
@@ -98,30 +100,36 @@
 
 			for (var i = 0; i < values.Length; i++)
 			{
-				if (i < valuesOrder.Count)
+				if (valuesOrder.ContainsKey(i))
 				{
 					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
 						"Latitude", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = Latitude.TryParse(values[i], out lat);
-						if (!parceresult)
-							return false;
+
+						if (parceresult)
+							continue;
+						return false;
 					}
 
 					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
 							"Longitude", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = Longitude.TryParse(values[i], out lon);
-						if (!parceresult)
-							return false;
+
+						if (parceresult)
+							continue;
+						return false;
 					}
 
 					if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(valuesOrder[i],
 							"Depth", CompareOptions.IgnoreCase) >= 0)
 					{
 						var parceresult = LinearDimension.TryParse(values[i], depthUnit, out dpt);
-						if (!parceresult)
-							return false;
+
+						if (parceresult)
+							continue;
+						return false;
 					}
 				}
 				else

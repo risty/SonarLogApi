@@ -48,17 +48,27 @@
 		}
 
 		/// <summary>
-		/// Reads <see cref="CsvLogData"/> from <see cref="Stream"/>.
+		/// Reads <see cref="CsvLogData"/> from <see cref="Stream"/> with default values order. Default order is { 0, "Latitude" }, { 1, "Longitude" }, { 2, "Depth" }.
 		/// </summary>
 		/// <param name="stream"><see cref="Stream"/>.</param>
 		/// <returns><see cref="CsvLogData"/> object.</returns>
 		public static CsvLogData ReadFromStream(Stream stream)
 		{
+			return ReadFromStream(stream, new Dictionary<int, string> { { 0, "Latitude" }, { 1, "Longitude" }, { 2, "Depth" } });
+		}
+
+		/// <summary>
+		/// Reads <see cref="CsvLogData"/> from <see cref="Stream"/> with specified values order.
+		/// </summary>
+		/// <param name="stream"><see cref="Stream"/>.</param>
+		/// <param name="valuesOrder">Order of values at strings. For example: { 0, "Latitude" }, { 1, "Longitude" }, { 2, "Depth" }.</param>
+		/// <returns><see cref="CsvLogData"/> object.</returns>
+		public static CsvLogData ReadFromStream(Stream stream, IDictionary<int, string> valuesOrder)
+		{
 			if (!stream.CanRead)
 				throw new InvalidOperationException("Can't read from stream");
 
 			var listofEntrys = new List<CsvLogEntry>();
-			var valuesOrder = new Dictionary<int, string> { { 0, "Latitude" }, { 1, "Longitude" }, { 2, "Depth" } };
 
 			using (var reader = new StreamReader(stream, Encoding.UTF8))
 			{
