@@ -38,6 +38,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompassLogTests.cs" />
     <Compile Include="ConsoleLogConverterTests.cs" />
     <Compile Include="CSVTests.cs" />
     <Compile Include="LowranceTests.cs" />
@@ -58,6 +59,7 @@
     <None Include="input.sl2" />
     <None Include="packages.config" />
     <None Include="input.sl3" />
+    <None Include="ValuesFromCompass.csv" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
