@@ -177,7 +177,35 @@
 
 		#endregion
 
-		#region Get distance (inverse problem) at sphere with Haversine 
+		#region Direct and inverse problem with Haversine on sphere (great circle).
+
+		/// <summary>
+		/// Get <see cref="CoordinatePoint" /> at distance and direction on sphere with Haversine.
+		/// </summary>
+		/// <param name="basePoint">Source <see cref="CoordinatePoint"/>.</param>
+		/// <param name="distance">Distance to a new point, meters.</param>
+		/// <param name="azimuth">Azimuth to a new point, radians.</param>
+		/// <param name="backAzimuth">Azimuth from a new point to base point, radians.</param>
+		/// <returns><see cref="CoordinatePoint" /> at specified distance and direction from the base point.</returns>
+		/// <seealso cref="http://www.movable-type.co.uk/scripts/latlong.html"/>
+		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionWithHaversine(CoordinatePoint basePoint, LinearDimension distance, double azimuth, out double backAzimuth)
+		{
+			var startLatitudeRadians = basePoint.Latitude.ToRadians();
+			var dR = distance.GetMeters() / _earthWgs84MeanRadius;
+
+			var finishLatitudeRadians = Math.Asin(Math.Sin(startLatitudeRadians) * Math.Cos(dR) +
+							   Math.Cos(startLatitudeRadians) * Math.Sin(dR) * Math.Cos(azimuth));
+			var finishLongitudeRadians = basePoint.Longitude.ToRadians() +
+				Math.Atan2(Math.Sin(azimuth) * Math.Sin(dR) * Math.Cos(startLatitudeRadians), Math.Cos(dR) - Math.Sin(startLatitudeRadians) * Math.Sin(finishLatitudeRadians));
+
+			var y = Math.Sin(finishLongitudeRadians - basePoint.Longitude.ToRadians()) * Math.Cos(finishLatitudeRadians);
+			var x = Math.Cos(startLatitudeRadians) * Math.Sin(finishLatitudeRadians) -
+					Math.Sin(startLatitudeRadians) * Math.Cos(finishLatitudeRadians) * Math.Cos(finishLongitudeRadians - basePoint.Longitude.ToRadians());
+
+			backAzimuth = Math.Atan2(y, x) + Math.PI;
+
+			return new CoordinatePoint(Latitude.FromRadians(finishLatitudeRadians), Longitude.FromRadians(finishLongitudeRadians));
+		}
 
 		/// <summary>
 		/// Returns the distance between two <see cref="CoordinatePoint" /> at sphere with WGS84 Mean Radius with Haversine formula.
@@ -227,9 +255,9 @@
 		/// Get <see cref="CoordinatePoint" /> at distance and direction on an ellipsoid.
 		/// </summary>
 		/// <param name="basePoint">Source <see cref="CoordinatePoint"/>.</param>
-		/// <param name="distance">Distance to a new point.</param>
-		/// <param name="azimuth">Azimuth to a new point.</param>
-		/// <param name="backAzimuth">Azimuth from a new point to base point.</param>
+		/// <param name="distance">Distance to a new point, meters.</param>
+		/// <param name="azimuth">Azimuth to a new point, radians.</param>
+		/// <param name="backAzimuth">Azimuth from a new point to base point, radians.</param>
 		/// <returns><see cref="CoordinatePoint" /> at specified distance and direction from the base point.</returns>
 		public static CoordinatePoint GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(CoordinatePoint basePoint, LinearDimension distance, double azimuth, out double backAzimuth)
 		{
@@ -257,7 +285,7 @@
 				newDeltaLongitude = sigma * (1 + (Math.Pow(alpha, 2d) - Math.Pow(beta, 2d)) / 24);
 				newDeltaAzimuth = alpha * (1 + (3 * Math.Pow(beta, 2d) + 2 * Math.Pow(sigma, 2d) - 2 * Math.Pow(alpha, 2d)) / 24);
 			}
-			while (newDeltaLatitude - deltaLatitude > 0.0000001d || deltaLongitude - newDeltaLongitude > 0.0000001d);
+			while (Math.Abs(newDeltaLatitude - deltaLatitude) > 0.0000001d || Math.Abs(deltaLongitude - newDeltaLongitude) > 0.0000001d);
 
 			backAzimuth = azimuth + newDeltaAzimuth + Math.PI;
 			return new CoordinatePoint(Latitude.FromRadians(basePoint.Latitude.ToRadians() + newDeltaLatitude),

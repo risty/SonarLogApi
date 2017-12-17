@@ -138,13 +138,6 @@ namespace NUnit.Tests
 	[TestFixture(Author = ProjectDescriptions.Company)]
 	public class CoordinatePointTests
 	{
-		const double _northLatitudeDouble = 43.81234123;
-		const double _equatorLatitudeDouble = 0;
-		const double _southLatitudeDouble = -60.813454769;
-
-		const double _westLongitudeDouble = -164.243457567;
-		const double _baseLongitudeDouble = 0;
-		const double _eastLongitudeDouble = 95.4567427812;
 
 		[Test(TestOf = typeof(CoordinatePoint))]
 		public void EqualTest()
@@ -162,26 +155,41 @@ namespace NUnit.Tests
 		[Test(TestOf = typeof(CoordinatePoint))]
 		public void DistanceTest()
 		{
-
-			// expected distances takes from Lowrance HDS7 Gen3
-			//seem like HDS7 Gen3 calculate distances with sphere Earth model
+			// expected distances takes from:
+			//1. Lowrance HDS7 Gen3
+			//2. http://edwilliams.org/gccalc.htm
 			var basePoint = new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.719));
 
 			var two = new CoordinatePoint(new Latitude(60, 12.324), new Longitude(32, 15.530));
+			//Lowrance HDS7 Gen3
 			Assert.AreEqual(9710, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 5);
 			Assert.AreEqual(9710, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 26);
 
+			//edwilliams.org
+			Assert.AreEqual(9735.229, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 25);
+			Assert.AreEqual(9735.229, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.01d); //great accuracu
+
 			two = new CoordinatePoint(new Latitude(57, 36.631), new Longitude(29, 44.306));
+			//Lowrance HDS7 Gen3
 			Assert.AreEqual(315800, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 200);
 			Assert.AreEqual(315800, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 1000);
+
+			//edwilliams.org
+			Assert.AreEqual(316682.824, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 700);
+			Assert.AreEqual(316682.824, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 10);
 
 			two = new CoordinatePoint(new Latitude(51, 11.377), new Longitude(44, 14.519));
 			Assert.AreEqual(1239000, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 700);
 			Assert.AreEqual(1239000, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 5000);
 
 			two = new CoordinatePoint(new Latitude(60, 07.317), new Longitude(32, 18.822));
+			//Lowrance HDS7 Gen3
 			Assert.AreEqual(97.3d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 0.1d);
 			Assert.AreEqual(97.3d, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.4d);
+
+			//edwilliams.org
+			Assert.AreEqual(97.598, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 0.4d);
+			Assert.AreEqual(97.598, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.01d);
 
 			two = new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.716));
 			Assert.AreEqual(5.1d, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 0.5d);
@@ -203,17 +211,54 @@ namespace NUnit.Tests
 		public void GetCoordinatePointAtDistanceAndDirectionTest()
 		{
 			var baseCoordinatePoint = new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.719));
+			var _d2R = Math.PI / 180D;
 
-			//expected values takes from HDS Gen3
-			var point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70, out _);
-			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.328), new Longitude(32, 18.722)), point1);
+			//expected values taken from http://edwilliams.org/gccalc.htm
 
-			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71, out _);
-			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.731)), point1);
+			var pointWithSphereFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionWithHaversine(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70 * _d2R, out _);
+			var pointWithEllipsoidFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(3.1d), 70 * _d2R, out _);
 
-			point1 = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88, out _);
-			Assert.AreEqual(new CoordinatePoint(new Latitude(60, 07.330), new Longitude(32, 18.825)), point1);
+			//Sphere
+			Assert.AreEqual(60 + 7.3286 / 60d, pointWithSphereFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.7221 / 60d, pointWithSphereFormula.Longitude.ToDegrees(), 0.000001d);
 
+			//Ellipsoid
+			Assert.AreEqual(60 + 7.3286 / 60d, pointWithEllipsoidFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.7221 / 60d, pointWithEllipsoidFormula.Longitude.ToDegrees(), 0.000001d);
+
+			pointWithSphereFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionWithHaversine(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71 * _d2R, out _);
+			pointWithEllipsoidFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(10.9d), 71 * _d2R, out _);
+
+			//Sphere
+			Assert.AreEqual(60 + 7.3299 / 60d, pointWithSphereFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.7301 / 60d, pointWithSphereFormula.Longitude.ToDegrees(), 0.000002d); //2*10-6 !!!!
+
+			//Ellipsoid
+			Assert.AreEqual(60 + 7.3299 / 60d, pointWithEllipsoidFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.7301 / 60d, pointWithEllipsoidFormula.Longitude.ToDegrees(), 0.000001d);
+
+			pointWithSphereFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionWithHaversine(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88 * _d2R, out _);
+			pointWithEllipsoidFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(97.8d), 88 * _d2R, out _);
+
+			//Sphere
+			Assert.AreEqual(60 + 7.3298 / 60d, pointWithSphereFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.8245 / 60d, pointWithSphereFormula.Longitude.ToDegrees(), 0.000007d); //7*10-6 !!!!
+
+			//Ellipsoid
+			Assert.AreEqual(60 + 7.3298 / 60d, pointWithEllipsoidFormula.Latitude.ToDegrees(), 0.000001d);
+			Assert.AreEqual(32 + 18.8245 / 60d, pointWithEllipsoidFormula.Longitude.ToDegrees(), 0.000001d);
+
+			pointWithSphereFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionWithHaversine(baseCoordinatePoint, LinearDimension.FromMeters(1400), 233 * _d2R, out _);
+			pointWithEllipsoidFormula = CoordinatePoint.GetCoordinatePointAtDistanceAndDirectionOnAnEllipsoid(baseCoordinatePoint, LinearDimension.FromMeters(1400), 233 * _d2R, out _);
+
+			//Sphere
+			//poor accuracy
+			Assert.AreEqual(60 + 6.8742 / 60d, pointWithSphereFormula.Latitude.ToDegrees(), 0.00002d); //2*10-5 !!!!
+			Assert.AreEqual(32 + 17.5126 / 60d, pointWithSphereFormula.Longitude.ToDegrees(), 0.00008d); //8*10-5 !!!!
+
+			//Ellipsoid
+			Assert.AreEqual(60 + 6.8742 / 60d, pointWithEllipsoidFormula.Latitude.ToDegrees(), 0.0000011d);
+			Assert.AreEqual(32 + 17.5126 / 60d, pointWithEllipsoidFormula.Longitude.ToDegrees(), 0.000003d);
 		}
 
 	}
@@ -228,7 +273,7 @@ namespace NUnit.Tests
 			var depth1 = new LinearDimension(45, LinearDimensionUnit.Foot);
 			Assert.AreEqual(13.716, depth1.GetMeters(), 0.001);
 
-			//20 meters == 13.761 meters
+			//20 meters == 65.61679 meters
 			var depth2 = new LinearDimension(20, LinearDimensionUnit.Meter);
 			Assert.AreEqual(65.61679, depth2.GetFoots(), 0.001);
 		}
