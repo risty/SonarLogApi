@@ -118,9 +118,9 @@
 			foreach (var channel in data.Frames.Select(fr => fr.ChannelType).Distinct())
 			{
 				var channelFrames = data.Frames.Where(fr => fr.ChannelType == channel).ToList();
-				var firstFrame = channelFrames.First();
+				var firstFrame = channelFrames.FirstOrDefault();
 
-				var str = $"|{channel + "(" + (byte)channel + ")",20}|{firstFrame.Frequency,22}|{firstFrame.FrameIndex,13}|{channelFrames.Last().FrameIndex,12}|{channelFrames.Count,12}|";
+				var str = $"|{channel + "(" + (byte)channel + ")",20}|{firstFrame?.Frequency,22}|{firstFrame?.FrameIndex,13}|{channelFrames.Last().FrameIndex,12}|{channelFrames.Count,12}|";
 				Console.WriteLine(str);
 
 			}
@@ -304,7 +304,7 @@
 							Console.Write(sourceChannel + ",");
 						}
 						Console.Write("\n");
-						Console.WriteLine("Channel for frame generation is:{0}", dstChannel.FirstOrDefault());
+						Console.WriteLine("Channel for frame generation is:{0}", dstChannel.Single());
 
 						Console.WriteLine("Force erase points at destination channel before generate(\"f\" option): {0}", forceGenerate);
 						Console.WriteLine("Generate sounded data from depth value(\"d\" option): {0}", generateFromDepth);
@@ -326,12 +326,12 @@
 						//erase dstChannel frames from data
 						if (forceGenerate)
 						{
-							erasedPointsCountAtDstChannel = data.Frames.RemoveAll(frame => frame.ChannelType == dstChannel.FirstOrDefault());
+							erasedPointsCountAtDstChannel = data.Frames.RemoveAll(frame => frame.ChannelType == dstChannel.Single());
 						}
 
 						//get points for existed dst channel frames
 						var dstChannelFramesPoints = data.Frames
-							.Where(frame => frame.ChannelType == dstChannel.FirstOrDefault())
+							.Where(frame => frame.ChannelType == dstChannel.Single())
 							.Select(frame => frame.Point).ToList();
 
 						//generate and add frame for each unique point
@@ -339,7 +339,7 @@
 						{
 							if (!dstChannelFramesPoints.Contains(unicueFrame.Point))
 							{
-								data.Frames.Add(Frame.GenerateFromOtherChannelFrame(dstChannel.FirstOrDefault(), unicueFrame, generateFromDepth));
+								data.Frames.Add(Frame.GenerateFromOtherChannelFrame(dstChannel.Single(), unicueFrame, generateFromDepth));
 							}
 						}
 
