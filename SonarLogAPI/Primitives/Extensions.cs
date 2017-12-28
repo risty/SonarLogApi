@@ -5,11 +5,8 @@ using SonarLogAPI.CSV;
 
 namespace SonarLogAPI.Primitives
 {
-	
-
 	public static class Extensions
 	{
-
 		/// <summary>
 		/// Get unique depth points from sequence.
 		/// </summary>
@@ -23,6 +20,5 @@ namespace SonarLogAPI.Primitives
 					new CsvLogEntry(depthPointSourceGroup.Key,
 						LinearDimension.FromMeters(depthPointSourceGroup.Average(pnt => pnt.Depth.GetMeters()))));
 		}
-
 	}
 }
