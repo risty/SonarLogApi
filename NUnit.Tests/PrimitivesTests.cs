@@ -1,4 +1,10 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using NUnit.Framework;
+using SonarLogAPI.CSV;
+using SonarLogAPI.Lowrance;
 
 
 namespace NUnit.Tests
@@ -340,7 +346,84 @@ namespace NUnit.Tests
 
 			Assert.AreEqual(point4ExpectedDecination,
 				MagneticVariation.GetMagneticVariation(lat4, lon4, 0, julianDay, MagneticVariation.MagneticVariationModels.WMM2015, out _), 0.0001d);
-		}
-	}
 
+        }
+
+	    [Test(TestOf = typeof(MagneticVariation))]
+        public void GetMagneticVariationTest2()
+	    {
+            // expected values from https://www.ngdc.noaa.gov/geomag/WMM/data/WMM2015/WMM2015_Report.pdf, page 20
+
+            var date1 = new DateTimeOffset(2015, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+            var point1 = new CoordinatePoint(Latitude.FromDegrees(80),Longitude.FromDegrees(0));
+
+	        var point1ExpectedDecination = -3.85 * _toRadians;
+
+            Assert.AreEqual(point1ExpectedDecination,
+            MagneticVariation.GetMagneticVariation(point1, 5, 0, date1, MagneticVariation.MagneticVariationModels.WMM2015
+	            , out _),0.00002d);
+
+
+	        var date2 = new DateTimeOffset(2015, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+	        var point2 = new CoordinatePoint(Latitude.FromDegrees(0), Longitude.FromDegrees(120));
+
+	        var point2ExpectedDecination = 0.57 * _toRadians;
+
+	        Assert.AreEqual(point2ExpectedDecination,
+	            MagneticVariation.GetMagneticVariation(point2, 5, 0, date2, MagneticVariation.MagneticVariationModels.WMM2015
+	                , out _), 0.00001d);
+
+        }
+
+	    [Test(TestOf = typeof(MagneticVariation))]
+        public void CoordinatesRoundingAndMagVarCalculationTest()
+	    {
+            var point1 = new CoordinatePoint(Latitude.FromDegrees(60.12345888),Longitude.FromDegrees(30.12345888));
+	        var point2 = new CoordinatePoint(Latitude.FromDegrees(60.12345666), Longitude.FromDegrees(30.12345666));
+
+	        var point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow, 
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+	        var point2Variation = MagneticVariation.GetMagneticVariation(point2, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+
+            Assert.AreNotEqual(point1Variation, point2Variation);
+
+	        point1Variation = MagneticVariation.GetMagneticVariation(point1, 5, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+	        point2Variation = MagneticVariation.GetMagneticVariation(point2, 5, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+
+	        Assert.AreEqual(point1Variation, point2Variation);
+        }
+
+	    [Test(TestOf = typeof(MagneticVariation))]
+	    public void MagneticVariationCalculationCacheTest()
+	    {
+	        var point1 = new CoordinatePoint(Latitude.FromDegrees(60.12345888), Longitude.FromDegrees(30.12345888));
+
+	        var watch = Stopwatch.StartNew();
+	        var point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+            watch.Stop();
+
+	        var elapsed1 = watch.Elapsed;
+
+	        point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+	        point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+            point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+
+            watch.Restart();
+            point1Variation = MagneticVariation.GetMagneticVariation(point1, 6, 0, DateTimeOffset.UtcNow,
+	            MagneticVariation.MagneticVariationModels.WMM2015, out _);
+	        watch.Stop();
+
+	        var elapsed2 = watch.Elapsed;
+
+            // first run takes more time
+	        Assert.IsTrue(elapsed1 > elapsed2);
+        }
+    }
 }
