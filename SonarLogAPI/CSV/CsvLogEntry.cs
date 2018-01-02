@@ -84,7 +84,7 @@
 		/// <param name="depthUnit">Depth unit</param>
 		/// <param name="valuesOrder">Represent order of CvsLogEntry properties in string</param>
 		/// <param name="result">CvsLogEntry</param>
-		/// <returns>Conversion successed or failed</returns>
+		/// <returns>Conversion succeeded or failed</returns>
 		public static bool TryParse(string cvsLogEntryString, char charForSplit, LinearDimensionUnit depthUnit, IDictionary<int, string> valuesOrder, out CsvLogEntry result)
 		{
 			result = new CsvLogEntry { UnexpectedValues = new List<string>() };
@@ -94,7 +94,7 @@
 			LinearDimension dpt = null;
 			var values = cvsLogEntryString.Split(charForSplit);
 
-			// if string does't contanes values or values count less then expect return false
+			// if string doesn't contains values or values count less then expect return false
 			if (values.Length == 0 || values.Length < valuesOrder.Count)
 				return false;
 

@@ -3,7 +3,7 @@
 	using System;
 	using System.Globalization;
 
-	//can be replased to GeoCoordinate if nesesary https://msdn.microsoft.com/en-us/library/system.device.location.geocoordinate(v=vs.110).aspx
+	//can be replaced to GeoCoordinate if necessary https://msdn.microsoft.com/en-us/library/system.device.location.geocoordinate(v=vs.110).aspx
 	//?
 
 	/// <summary>
@@ -233,7 +233,7 @@
 		/// <seealso cref="http://en.wikipedia.org/wiki/Great-circle_distance"/>
 		public static LinearDimension GetDistanceBetweenPointsWithHaversine(double lat1, double long1, double lat2, double long2, double altitude = 0)
 		{
-			//with antipod points modification 
+			//with antipode points modification 
 			//https://wikimedia.org/api/rest_v1/media/math/render/svg/c3159d773b79d31c3f5ff176a6262fabd20cdbc9
 			//converts all degrees to radians
 			double lat1Rad = lat1 * _d2R;
@@ -315,7 +315,7 @@
 		/// <param name="altitude">Point altitude above surface(meters). Zero by default.</param>
 		/// <returns>Distance between points.</returns>
 		/// <seealso cref="http://www.geogr.msu.ru/cafedra/karta/docs/GOK/gok_lecture_4.pdf"/>
-		/// <remarks>This method can return two azimuts to points.</remarks>
+		/// <remarks>This method can return two azimuths to points.</remarks>
 		public static LinearDimension GetDistanceBetweenPointsOnAnEllipsoid(double lat1, double long1, double lat2, double long2, double altitude = 0)
 		{
 			//degree(pow) reduction formula

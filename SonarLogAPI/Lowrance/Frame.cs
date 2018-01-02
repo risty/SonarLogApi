@@ -13,7 +13,7 @@
 	public enum ChannelType : byte
 	{
 		/// <summary>
-		/// Tranditional Sonar
+		/// Traditional Sonar
 		/// </summary>
 		Primary = 0,
 
@@ -94,7 +94,7 @@
 		Frequency = 50,//byte
 
 		//undefined offset 53, 1 byte
-		CreationDataTime = 60,//int, 4 bytes, value in fist frame = unix time stamp of file creation.
+		CreationDataTime = 60,//int, 4 bytes, value in fist frame = Unix time stamp of file creation.
 							  //other frames - time from device boot.
 
 		Depth = 64,//float, 4 bytes
@@ -137,7 +137,7 @@
 		FrameIndex = 16,//int, 4 bytes
 		UpperLimit = 20,//float, 4 bytes
 		LowerLimit = 24,//float, 4 bytes
-		CreationDataTime = 40,//int, 4 bytes, value at fist frame = unix time stamp of file creation. if GPS cant fi[ position value will be "-1"
+		CreationDataTime = 40,//int, 4 bytes, value at fist frame = Unix time stamp of file creation. if GPS cant find position value will be "-1"
 							  //other frames - time in milliseconds from device boot.
 		PacketSize = 44,//short, 2 bytes
 		Depth = 48,//float, 4 bytes
@@ -179,12 +179,12 @@
 		public ChannelType ChannelType { get; set; }
 
 		/// <summary>
-		/// Size of soundeing/bounce data.
+		/// Size of sounding/bounce data.
 		/// </summary>
 		public short PacketSize { get; set; }
 
 		/// <summary>
-		/// Starts at 0. Used ot match frames/block on different channels.
+		/// Starts at 0. Used to match frames/block on different channels.
 		/// </summary>
 		public int FrameIndex { get; set; }
 
@@ -204,12 +204,12 @@
 		public LinearDimension KeelDepth { get; set; }
 
 		/// <summary>
-		/// Speed from gps in meters/second
+		/// Speed from GPS in meters/second
 		/// </summary>
 		public float SpeedGps { get; set; }
 
 		/// <summary>
-		/// Temperature, in Celcius
+		/// Temperature, in Celsius
 		/// </summary>
 		public float Temperature { get; set; }
 
@@ -219,7 +219,7 @@
 		public CoordinatePoint Point { get; set; }
 
 		/// <summary>
-		/// WaterSpeed in m/s. This value is taken from an actual Water Speed Sensor (such as a paddlewheel). 
+		/// WaterSpeed in m/s. This value is taken from an actual Water Speed Sensor (such as a paddle-wheel). 
 		/// If such a sensor is not present, it takes the value from "Speed" (GPS NMEA data) 
 		/// and sets WaterSpeedValid to false.
 		/// </summary>
@@ -261,11 +261,11 @@
 		/// Gets four bytes from <see cref="valueByteOffset"/> position in each frame in <see cref="BinaryReader"/> and represent is as single bytes, shorts, int, float.
 		/// </summary>
 		/// <param name="reader"><see cref="BinaryReader"/></param>
-		/// <param name="firstFrameFirstByteOffset">Offsen of first byte of firs frame in file</param>
+		/// <param name="firstFrameFirstByteOffset">Offset of first byte of firs frame in file</param>
 		/// <param name="valueByteOffset"></param>
 		/// <param name="version"><see cref="FileVersion"/></param>
 		/// <returns><see cref="IDictionary{TKey,TValue}"/>, where <see cref="TKey"/> is Frame First Byte Offset and <see cref="Value"/> is <see cref="Tuple{T1,T2,T3,T4,T5,T6,T7}"/>.
-		/// T1 is byte[] of fout bytes. 
+		/// T1 is byte[] of four bytes. 
 		/// T2 is short representation of first two bytes.
 		/// T3 is short representation of second two bytes.
 		/// T4 is int representation of all four bytes.
@@ -388,7 +388,7 @@
 					//get file creation time from this frame
 					var creationDataTimeInt = GetInt(reader, readPosition + GetOffset(slType, "CreationDataTime"));
 					var creationDataTimeOffset = DateTimeOffset.FromUnixTimeSeconds(creationDataTimeInt);
-					//if time from frame later thet previous values thet takes them
+					//if time from frame later then previous values then takes them
 					if (creationDataTimeOffset > fileCreationTime)
 						fileCreationTime = creationDataTimeOffset;
 
@@ -423,7 +423,7 @@
 					//get file creation time from this frame
 					var creationDataTimeInt = GetInt(reader, readPosition + GetOffset(slType, "CreationDataTime"));
 					var creationDataTimeOffset = DateTimeOffset.FromUnixTimeSeconds(creationDataTimeInt);
-					//if time from frame later thet previous values thet takes them
+					//if time from frame later then previous values then takes them
 					if (creationDataTimeOffset > fileCreationTime)
 						fileCreationTime = creationDataTimeOffset;
 
@@ -496,8 +496,8 @@
 
 			var frame = new Frame();
 
-			/*TODO check perfomance of reading frames set with(detales below):
-			 * 1.this offset parse realisation(GetOffset by property name)
+			/*TODO check performance of reading frames set with(details below):
+			 * 1.this offset parse realization(GetOffset by property name)
 			 * 2.getting offsets directly from specified enum
 			 * 3.without offset map. sequence of read-seek-read-seek in one bytes block
 			 */
@@ -662,7 +662,7 @@
 				writer.Write(new long());
 				writer.Write(new int());
 
-				//if it's first frame then write file creation time = earliest time fram all the frames
+				//if it's first frame then write file creation time = earliest time from all the frames
 				if (frameOffset == framesSetStartByteOffset)
 					writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
 				else
@@ -841,7 +841,7 @@
 				writer.Write(new long());
 				writer.Write(new byte());
 
-				//if it's first frame then write file creation time = earliest time fram all the frames
+				//if it's first frame then write file creation time = earliest time from all the frames
 				if (frameOffset == framesSetStartByteOffset)
 					writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
 				else
@@ -1114,7 +1114,7 @@
 		/// </summary>
 		/// <param name="requiredChannelType"><see cref="ChannelType"/> for a new(generated) frame.</param>
 		/// <param name="sourceFrame"></param>
-		/// <param name="generateSoundedData">Gererate sounded data. By default:false(take from source frame).</param>
+		/// <param name="generateSoundedData">Generate sounded data. By default:false(take from source frame).</param>
 		/// <returns>New(generated) frame.</returns>
 		public static Frame GenerateFromOtherChannelFrame(ChannelType requiredChannelType, Frame sourceFrame, bool generateSoundedData = false)
 		{

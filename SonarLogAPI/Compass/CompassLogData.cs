@@ -82,7 +82,7 @@ namespace SonarLogAPI.Compass
 			{
 				CreationDateTime = DateTimeOffset.Now,
 				CompassLogEntrys = listofEntrys,
-				Name = $"{listofEntrys.Count} compass entrys."
+				Name = $"{listofEntrys.Count} compass entries."
 			};
 		}
 	}

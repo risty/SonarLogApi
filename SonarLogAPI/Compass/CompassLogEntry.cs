@@ -77,7 +77,7 @@
 			double roll = 0;
 			var values = cvsLogEntryString.Split(charForSplit);
 
-			// if string does't contanes values or values count less then expect return false
+			// if string doesn't contains values or values count less then expect return false
 			if (values.Length == 0 || values.Length < valuesOrder.Count)
 				return false;
 

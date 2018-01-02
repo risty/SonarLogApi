@@ -25,7 +25,7 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		/// </summary>
-		/// <param name="degrees">The latitude of the location in deegrees. May range from -90.0 to 90.0.</param>
+		/// <param name="degrees">The latitude of the location in degrees. May range from -90.0 to 90.0.</param>
 		/// <exception cref="ArgumentOutOfRangeException" />
 		public Latitude(double degrees) : base(degrees)
 		{
@@ -39,7 +39,7 @@
 		///  <summary>
 		///  Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		///  </summary>
-		///  <param name="degrees">Deegrees part of latitude. May range from -90.0 to 90.0.</param>
+		///  <param name="degrees">Degrees part of latitude. May range from -90.0 to 90.0.</param>
 		/// <param name="minutes">Minutes part of latitude. May range from 0 to 60.0.</param>
 		/// <exception cref="ArgumentOutOfRangeException" />
 		public Latitude(double degrees, double minutes) : base(degrees, minutes)
@@ -51,7 +51,7 @@
 		///  <summary>
 		///  Initializes a new instance of the <see cref="Latitude" /> class from latitude data.
 		///  </summary>
-		///  <param name="degrees">Deegrees part of <see cref="Latitude" />. May range from -90.0 to 90.0.</param>
+		///  <param name="degrees">Degrees part of <see cref="Latitude" />. May range from -90.0 to 90.0.</param>
 		/// <param name="minutes">Minutes part of <see cref="Latitude" />. May range from 0 to 60.0.</param>
 		/// <param name="seconds">Seconds part of <see cref="Latitude" />. May range from 0 to 60.0.</param>
 		/// <exception cref="T:System.ArgumentOutOfRangeException" />
@@ -113,7 +113,7 @@
 		/// </summary>
 		/// <param name="stringvalue">String representation of Latitude degrees value.</param>
 		/// <param name="latitude"><see cref="Latitude" /> object.</param>
-		/// <returns>Conversion successed or failed.</returns>
+		/// <returns>Conversion succeeded or failed.</returns>
 		public static bool TryParse(string stringvalue, out Latitude latitude)
 		{
 			var isSuccessParse = double.TryParse(stringvalue, NumberStyles.Any, CultureInfo.InvariantCulture, out var result);

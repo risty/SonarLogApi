@@ -1,20 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
-using SonarLogAPI.CSV;
-using SonarLogAPI.Lowrance;
+﻿using System.Diagnostics;
+using System;
+using System.Globalization;
 
+using SonarLogAPI.Localization;
+using SonarLogAPI.Primitives;
+
+using NUnit.Framework;
 
 namespace NUnit.Tests
 {
-	using System;
-	using System.Globalization;
-
-	using SonarLogAPI.Localization;
-	using SonarLogAPI.Primitives;
-
 	[TestFixture(Author = ProjectDescriptions.Company)]
 	public class LatitudeTests
 	{
@@ -173,7 +167,7 @@ namespace NUnit.Tests
 
 			//edwilliams.org
 			Assert.AreEqual(9735.229, CoordinatePoint.GetDistanceBetweenPointsWithHaversine(basePoint, two).GetMeters(), 25);
-			Assert.AreEqual(9735.229, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.01d); //great accuracu
+			Assert.AreEqual(9735.229, CoordinatePoint.GetDistanceBetweenPointsOnAnEllipsoid(basePoint, two).GetMeters(), 0.01d); //great accuracy
 
 			two = new CoordinatePoint(new Latitude(57, 36.631), new Longitude(29, 44.306));
 			//Lowrance HDS7 Gen3

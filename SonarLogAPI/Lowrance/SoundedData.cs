@@ -73,7 +73,7 @@
 					break;
 				case ChannelType.SidescanComposite:
 
-					//invert Data array and change upper and liwer limits values
+					//invert Data array and change upper and lower limits values
 					return new SoundedData(soundedData.Data.Reverse().ToArray(), soundedData.ChannelType,
 						soundedData.LowerLimit * -1, soundedData.UpperLimit * -1);
 
@@ -175,7 +175,7 @@
 			var allTheWaterColumnBytesArray = new byte[allTheWaterColumnPacketSize];
 
 			//and fill it with patterns for water surface noises and bottom surface
-			// lets water surface noises always has 0.5 meter depth. then one meter packetsize is
+			// lets water surface noises always has 0.5 meter depth. then one meter packet size is
 			var oneMeterPacketSize = (uint)(allTheWaterColumnPacketSize / lowerLimit.GetMeters());
 
 			//then noise array is 
@@ -193,7 +193,7 @@
 				//then bottom array is 
 				var bottomArray = GetDecreasingByteSurface(bottomSurfacePacketSize);
 
-				//and copy bottom array to tne end of allTheWaterColumnBytesArray
+				//and copy bottom array to the end of allTheWaterColumnBytesArray
 				bottomArray.CopyTo(allTheWaterColumnBytesArray, allTheWaterColumnPacketSize - bottomSurfacePacketSize);
 			}
 
@@ -206,7 +206,7 @@
 		/// <inheritdoc />
 		public override string ToString()
 		{
-			return $"From {LowerLimit:#.#} to {UpperLimit:#.#}, lenght {Data.Length}.";
+			return $"From {LowerLimit:#.#} to {UpperLimit:#.#}, length {Data.Length}.";
 		}
 
 	}

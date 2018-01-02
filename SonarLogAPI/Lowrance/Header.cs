@@ -14,17 +14,17 @@
 	}
 
 	/// <summary>
-	/// SlG/SL2/SL3 binary file header, 8 bytes lenght
+	/// SlG/SL2/SL3 binary file header, 8 bytes length
 	/// </summary>
 	public struct Header
 	{
 		/// <summary>
-		/// Header lenght in bytes
+		/// Header length in bytes
 		/// </summary>
 		public static byte Lenght { get; } = 8;
 
 		/// <summary>
-		/// Standart SL2 Header
+		/// Standard SL2 Header
 		/// </summary>
 		public static Header sl2
 		{
@@ -42,7 +42,7 @@
 		}
 
 		/// <summary>
-		/// Standart SL3 Header
+		/// Standard SL3 Header
 		/// </summary>
 		public static Header sl3
 		{
@@ -115,7 +115,7 @@
 			writer.Write((short)headerToWrite.FileVersion);
 			writer.Write(headerToWrite.HardwareVersion);
 			writer.Write(headerToWrite.BlockSize);
-			//write zero from current position to lenght position
+			//write zero from current position to length position
 			while (writer.BaseStream.Position < headerFirstByteOffset + Lenght)
 				writer.Write(new byte());
 		}

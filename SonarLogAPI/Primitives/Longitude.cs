@@ -25,7 +25,7 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:SonarLogAPI.Primitives.Longitude" /> class from longitude data.
 		/// </summary>
-		/// <param name="degrees">The longitude of the location in deegrees. May range from -180.0 to 180.0.</param>
+		/// <param name="degrees">The longitude of the location in degrees. May range from -180.0 to 180.0.</param>
 		/// <exception cref="ArgumentOutOfRangeException" />
 		public Longitude(double degrees)
 			: base(degrees)
@@ -40,7 +40,7 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:SonarLogAPI.Primitives.Longitude" /> class from longitude data.
 		/// </summary>
-		/// <param name="degrees">The longitude of the location in deegrees. May range from -180.0 to 180.0.</param>
+		/// <param name="degrees">The longitude of the location in degrees. May range from -180.0 to 180.0.</param>
 		/// <param name="minutes">Minutes part of latitude. May range from 0 to 60.0.</param>
 		/// <exception cref="T:System.ArgumentOutOfRangeException" />
 		public Longitude(double degrees, double minutes)
@@ -53,7 +53,7 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Longitude" /> class from longitude data.
 		/// </summary>
-		/// <param name="degrees">The <see cref="Longitude" /> of the location in deegrees. May range from -180.0 to 180.0.</param>
+		/// <param name="degrees">The <see cref="Longitude" /> of the location in degrees. May range from -180.0 to 180.0.</param>
 		/// <param name="minutes">Minutes part of <see cref="Longitude" />. May range from 0 to 60.0.</param>
 		/// <param name="seconds">Seconds part of <see cref="Longitude" />. May range from 0 to 60.0.</param>
 		public Longitude(double degrees, double minutes, double seconds)
@@ -115,7 +115,7 @@
 		/// </summary>
 		/// <param name="stringvalue">String representation of Longitude degrees value.</param>
 		/// <param name="latitude">Longitude object.</param>
-		/// <returns>Conversion successed or failed.</returns>
+		/// <returns>Conversion succeeded or failed.</returns>
 		public static bool TryParse(string stringvalue, out Longitude latitude)
 		{
 			var isSuccessParse = double.TryParse(stringvalue, NumberStyles.Any, CultureInfo.InvariantCulture, out var result);

@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Threading.Tasks;
 
 	using SonarLogAPI.Primitives;
@@ -36,7 +35,7 @@
 		}
 
 		/// <summary>
-		/// Ajust depth at <see cref="AdjustablePoints"/>.
+		/// Adjust depth at <see cref="AdjustablePoints"/>.
 		/// </summary>
 		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
 		public IEnumerable<IDepthPointSource> AdjustDepth()
@@ -46,7 +45,7 @@
 		}
 
 		/// <summary>
-		/// Ajust depth at <see cref="AdjustablePoints"/> async.
+		/// Adjust depth at <see cref="AdjustablePoints"/> async.
 		/// </summary>
 		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
 		public async Task<IEnumerable<IDepthPointSource>> AdjustDepthAsync()
@@ -69,7 +68,7 @@
 			NearestPointsEventArgs minDistncePointsInfo = null;
 
 			Parallel.ForEach(uniqueBasePoints,
-				//creat local Points info
+				//create local Points info
 				() => new NearestPointsEventArgs()
 				{
 					Distance = double.MaxValue
@@ -133,7 +132,7 @@
 		}
 
 		/// <summary>
-		/// Ajust depth at sequence of points.
+		/// Adjust depth at sequence of points.
 		/// </summary>
 		/// <param name="inputSequence">Sequence of points to adjust depth.</param>
 		/// <param name="ajustValue">Value to add to depth.</param>

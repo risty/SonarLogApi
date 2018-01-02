@@ -90,7 +90,7 @@
 		/// </summary>
 		/// <param name="stringvalue">String representation of <see cref="LinearDimension"/> value</param>
 		/// <param name="depthUnit"><see cref="LinearDimension"/> unit</param>
-		/// <param name="depth">Conversion successed or failed</param>
+		/// <param name="depth">Conversion succeeded or failed</param>
 		/// <returns></returns>
 		public static bool TryParse(string stringvalue, LinearDimensionUnit depthUnit, out LinearDimension depth)
 		{

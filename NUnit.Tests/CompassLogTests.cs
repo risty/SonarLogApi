@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 using NUnit.Framework;
 
 using SonarLogAPI.Localization;
+using SonarLogAPI.Compass;
 
 namespace NUnit.Tests
 {
-	using System.IO;
-	using System.Linq;
 
-	using SonarLogAPI.Compass;
-	using SonarLogAPI.CSV;
-	using SonarLogAPI.Lowrance;
 
 	[TestFixture(Author = ProjectDescriptions.Company)]
 	public class CompassLogTests
