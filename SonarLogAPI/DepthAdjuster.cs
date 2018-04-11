@@ -50,7 +50,7 @@
 		/// <returns><see cref="AdjustablePoints"/> after depth adjust.</returns>
 		public async Task<IEnumerable<IDepthPointSource>> AdjustDepthAsync()
 		{
-			return await Task.Run(() => AdjustDepth());
+			return await Task.Run(() => AdjustDepth()).ConfigureAwait(false);
 		}
 
 		/// <summary>
