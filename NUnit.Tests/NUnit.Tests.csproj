@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NUnit.Tests</RootNamespace>
     <AssemblyName>NUnit.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -50,9 +50,9 @@
       <Project>{7f08d594-ad69-4606-b784-d55faf45079e}</Project>
       <Name>ConsoleLogConverter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SonarLogAPI\SonarLogAPI.csproj">
-      <Project>{a7ef68a0-7a8d-404e-b3fe-4eabcfb26293}</Project>
-      <Name>SonarLogAPI</Name>
+    <ProjectReference Include="..\SonarLogApi\SonarLogApi.csproj">
+      <Project>{f2440e55-f0c5-484b-8b5a-c6dd524ece30}</Project>
+      <Name>SonarLogApi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
