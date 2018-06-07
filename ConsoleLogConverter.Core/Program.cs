@@ -209,6 +209,14 @@ namespace ConsoleLogConverter.Core
                 //Read Files
                 var data = ReadFile(options.InputFile, options.Verbose);
 
+                if (data == null)
+                {
+                    Console.WriteLine("Can't read frames from file");
+                    Console.WriteLine($"{Environment.NewLine}Please press any key to exit...");
+                    Console.ReadKey(true);
+                    return;
+                }
+
                 #region Depth Adjust
 
                 if (!string.IsNullOrWhiteSpace(options.DepthAdjustFile))

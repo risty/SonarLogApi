@@ -349,6 +349,36 @@
 			1400,
         };
 
+        public static Type FindBeginOfFirstValdFrameAndFileVersion(BinaryReader reader, ref int readPosition)
+        {
+            Type fileType = null;
+            while (readPosition <= reader.BaseStream.Length - 4)
+            {
+                //if we found specific value
+                if (SpecificSL2FrameValues.Contains(GetInt(reader, readPosition)))
+                {
+                    //sets readPosition to first byte of founded frame
+                    //32 - ChannelTypeOffset
+                    readPosition = readPosition - 32;
+                    fileType = typeof(Sl2FramePropertiesOffsets);
+                    break;
+                }
+
+                //if we found specific value
+                if (SpecificSL3FrameValues.Contains(GetInt(reader, readPosition)))
+                {
+                    //sets readPosition to first byte of founded frame
+                    //44 - ChannelTypeOffset
+                    readPosition = readPosition - 44;
+                    fileType = typeof(Sl3FramePropertiesOffsets);
+                    break;
+                }
+                readPosition++;
+            }
+
+            return fileType;
+        }
+
         /// <summary>
         /// Verify SL log file and create frames map.
         /// </summary>
@@ -361,7 +391,19 @@
         {
             fileCreationTime = DateTimeOffset.MinValue;
 
-            var slType = GetOffsetsTypeForFileVersion(version);
+            Type slType;
+            try
+            {
+                slType = GetOffsetsTypeForFileVersion(version);
+            }
+            catch (Exception e)
+            {
+                slType = FindBeginOfFirstValdFrameAndFileVersion(reader, ref readPosition);
+
+                if (slType == null)
+                    throw new ArgumentNullException(nameof(slType), "Can't define SL file type");
+            }
+
             var framesMap = new List<Tuple<int, TimeSpan>>();
 
             var thisTypeFrameSizeOffset = GetOffset(slType, "ThisFrameSize");
@@ -446,38 +488,8 @@
                 //and move readPosition to next frame first byte
                 readPosition += thisFrameSize;
 
-
                 //finds specific bytes and set readPosition to first byte of frame
-                while (readPosition < reader.BaseStream.Length)
-                {
-                    if (version == FileVersion.SL2)
-                    {
-                        //if we found specific value
-                        if (SpecificSL2FrameValues.Contains(GetInt(reader, readPosition)))
-                        {
-                            //sets readPosition to first byte of founded frame
-                            //32 - ChannelTypeOffset
-                            readPosition = readPosition - 32;
-                            thisFrameSize = GetShort(reader, readPosition + thisTypeFrameSizeOffset);
-                            break;
-                        }
-                    }
-
-                    if (version == FileVersion.SL3)
-                    {
-                        //if we found specific value
-                        if (SpecificSL3FrameValues.Contains(GetInt(reader, readPosition)))
-                        {
-                            //sets readPosition to first byte of founded frame
-                            //44 - ChannelTypeOffset
-                            readPosition = readPosition - 44;
-                            thisFrameSize = GetShort(reader, readPosition + thisTypeFrameSizeOffset);
-                            break;
-                        }
-                    }
-
-                    readPosition++;
-                }
+                FindBeginOfFirstValdFrameAndFileVersion(reader, ref readPosition);
 
             }
 
