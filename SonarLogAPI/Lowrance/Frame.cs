@@ -627,6 +627,10 @@
         /// <param name="framesSetStartByteOffset">Offset of first frame in Writers stream.</param>
         private static void WriteSl3Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
         {
+            //cut 10 and 11 channels because don't know how to write them
+            framesToWrite = framesToWrite.Where(frame =>
+                frame.ChannelType != (ChannelType) 10 && frame.ChannelType != (ChannelType) 11).ToList();
+
             //sort before writing
             framesToWrite.Sort();
 
@@ -770,8 +774,10 @@
         /// <param name="framesSetStartByteOffset">Offset of first frame in Writers stream.</param>
         private static void WriteSl2Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
         {
-            //takes frame with channel type != ChannelType.ThreeD and sort it after
-            framesToWrite = framesToWrite.Where(x => x.ChannelType != ChannelType.ThreeD).ToList();
+            //cut 7 and 8 channels because don't know how to write them
+            framesToWrite = framesToWrite.Where(frame => frame.ChannelType != ChannelType.ThreeD 
+                                                      && frame.ChannelType != (ChannelType)7
+                                                      && frame.ChannelType != (ChannelType)8).ToList();
 
             //sort before writing
             framesToWrite.Sort();
