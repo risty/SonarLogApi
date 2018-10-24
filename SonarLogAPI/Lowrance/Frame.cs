@@ -628,8 +628,10 @@
         private static void WriteSl3Frames(BinaryWriter writer, List<Frame> framesToWrite, int framesSetStartByteOffset)
         {
             //cut 10 and 11 channels because don't know how to write them
-            framesToWrite = framesToWrite.Where(frame =>
-                frame.ChannelType != (ChannelType) 10 && frame.ChannelType != (ChannelType) 11).ToList();
+            framesToWrite = framesToWrite.Where(frame => frame.ChannelType != (ChannelType) 7
+                                                        && frame.ChannelType != (ChannelType) 8
+                                                        && frame.ChannelType != (ChannelType) 10
+                                                        && frame.ChannelType != (ChannelType) 11).ToList();
 
             //sort before writing
             framesToWrite.Sort();
@@ -776,8 +778,10 @@
         {
             //cut 7 and 8 channels because don't know how to write them
             framesToWrite = framesToWrite.Where(frame => frame.ChannelType != ChannelType.ThreeD 
-                                                      && frame.ChannelType != (ChannelType)7
-                                                      && frame.ChannelType != (ChannelType)8).ToList();
+                                                         && frame.ChannelType != (ChannelType)7
+                                                         && frame.ChannelType != (ChannelType)8
+                                                         && frame.ChannelType != (ChannelType)10
+                                                         && frame.ChannelType != (ChannelType)11).ToList();
 
             //sort before writing
             framesToWrite.Sort();
