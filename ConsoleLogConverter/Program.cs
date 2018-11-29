@@ -64,6 +64,10 @@
 				 HelpText = "Depth value for adding or subtraction to the depth values in the log.")]
 			public string DepthShift { get; set; }
 
+		    [Option('p', "speed", Required = false,
+		        HelpText = "Absolute value of speed in meters/second, which will be set to SOG frames variable")]
+            public float NewSpeed { get; set; }
+
 			[OptionList('g', "generate", Separator = ':', Required = false,
 				 HelpText = "Generate frames for specific channel from the frames at other channel(s). Format: numbers and chars, " +
 							"separated by colon. " +
@@ -432,12 +436,24 @@
 					}
 				}
 
-				#endregion
+                #endregion
 
-				#region Creating output file
+                #region  SetNewSpeed
 
-				//makes output file if it necessary
-				if (options.OutputFileVersion != null && options.OutputFileVersion.Any())
+			    if (options.NewSpeed != 0)
+			    {
+			        foreach (var frame in data.Frames)
+			        {
+			            frame.SpeedGps = options.NewSpeed;
+			        }
+                }
+
+                #endregion
+
+                #region Creating output file
+
+                //makes output file if it necessary
+                if (options.OutputFileVersion != null && options.OutputFileVersion.Any())
 				{
 					bool FrameValidationFunc(Frame frame)
 					{
