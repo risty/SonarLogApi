@@ -197,7 +197,9 @@
 			fromStream.Close();
 			fromStream.Dispose();
 
-			var toStream = new FileStream
+		    firstFrameList.Sort();
+
+            var toStream = new FileStream
 				(testDir + @"\toFrame.sl3", FileMode.Create, FileAccess.Write);
 
 			using (var writer = new BinaryWriter(toStream))
@@ -231,8 +233,11 @@
 			Assert.IsTrue(firstFrameList.Count == 3);
 			Assert.IsTrue(secondFrameList.Count == 3);
 
-			//check properties of firs frame
-			Assert.AreEqual(firstFrameList[0].ChannelType, secondFrameList[0].ChannelType);
+            //sort frames in first sequence
+		    firstFrameList.Sort();
+
+            //check properties of firs frame
+            Assert.AreEqual(firstFrameList[0].ChannelType, secondFrameList[0].ChannelType);
 			Assert.AreEqual(firstFrameList[0].PacketSize, secondFrameList[0].PacketSize);
 			Assert.AreEqual(firstFrameList[0].FrameIndex, secondFrameList[0].FrameIndex);
 
@@ -249,7 +254,7 @@
 			Assert.AreEqual(firstFrameList[0].Altitude, secondFrameList[0].Altitude);
 			Assert.AreEqual(firstFrameList[0].Heading, secondFrameList[0].Heading);
 			//Assert.AreEqual(firstFrameList[0].Flags.Count, secondFrameList[0].Flags.Count);
-			//Assert.AreEqual(firstFrameList[0].TimeOffset.TotalMilliseconds, secondFrameList[0].TimeOffset.TotalMilliseconds);
+			Assert.AreEqual(firstFrameList[0].DateTimeOffset, secondFrameList[0].DateTimeOffset);
 			Assert.AreEqual(firstFrameList[0].SoundedData.Data, secondFrameList[0].SoundedData.Data);
 			Assert.AreEqual(firstFrameList[0].SoundedData.ChannelType, secondFrameList[0].SoundedData.ChannelType);
 			Assert.AreEqual(firstFrameList[0].SoundedData.LowerLimit, secondFrameList[0].SoundedData.LowerLimit);
@@ -271,8 +276,9 @@
 			Assert.AreEqual(firstFrameList[1].CourseOverGround, secondFrameList[1].CourseOverGround);
 			Assert.AreEqual(firstFrameList[1].Altitude, secondFrameList[1].Altitude);
 			Assert.AreEqual(firstFrameList[1].Heading, secondFrameList[1].Heading);
-			//Assert.AreEqual(firstFrameList[1].Flags, secondFrameList[1].Flags);
-			Assert.AreEqual(firstFrameList[1].SoundedData.Data, secondFrameList[1].SoundedData.Data);
+            //Assert.AreEqual(firstFrameList[1].Flags, secondFrameList[1].Flags);
+		    Assert.AreEqual(firstFrameList[1].DateTimeOffset, secondFrameList[1].DateTimeOffset);
+            Assert.AreEqual(firstFrameList[1].SoundedData.Data, secondFrameList[1].SoundedData.Data);
 			Assert.AreEqual(firstFrameList[1].SoundedData.ChannelType, secondFrameList[1].SoundedData.ChannelType);
 			Assert.AreEqual(firstFrameList[1].SoundedData.LowerLimit, secondFrameList[1].SoundedData.LowerLimit);
 			Assert.AreEqual(firstFrameList[1].SoundedData.UpperLimit, secondFrameList[1].SoundedData.UpperLimit);

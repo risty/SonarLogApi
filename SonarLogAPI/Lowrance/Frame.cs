@@ -648,9 +648,6 @@
 
             //take earliest date from frames and start writing from it 
             var firstFrameTime = framesToWrite.Select(frame => frame.DateTimeOffset).Min();
-            int lastFrameIndex = 0;
-            int timeOffsetMiliseconds = 0;
-
             short previousFrameSize = 0;
 
             foreach (var frame in framesToWrite)
@@ -679,20 +676,19 @@
                 writer.Write(new int());
 
                 //if it's first frame then write file creation time = earliest time from all the frames
+                int timeStampToWrite;
+                //if it's first frame then write file creation time = earliest time from all the frames
                 if (frameOffset == framesSetStartByteOffset)
-                    writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
+                {
+                    timeStampToWrite = (int)firstFrameTime.ToUnixTimeSeconds();
+                }
                 else
                 {
-                    //increase offset value
-                    if (lastFrameIndex != frame.FrameIndex)
-                    {
-                        lastFrameIndex = frame.FrameIndex;
-                        //add 150ms for the frame time offset
-                        timeOffsetMiliseconds += 150;
-                    }
-                    //write time offset
-                    writer.Write(timeOffsetMiliseconds);
+                    timeStampToWrite = (int)(firstFrameTime - frame.DateTimeOffset).TotalMilliseconds;
                 }
+
+                //write time offset
+                writer.Write(timeStampToWrite);
 
                 writer.Write(frame.PacketSize);
                 //write zero in 2 bytes (offset 46 to 48)
@@ -722,7 +718,7 @@
                 //write zero in 6 bytes (offset 118 to 124)
                 writer.Write(new short());
                 writer.Write(new int());
-                writer.Write(timeOffsetMiliseconds);
+                writer.Write(timeStampToWrite);
 
                 switch (frame.ChannelType)
                 {
@@ -796,9 +792,6 @@
 
             //take earlies date from frames and start writing from it 
             var firstFrameTime = framesToWrite.Select(frame => frame.DateTimeOffset).Min();
-            int lastFrameIndex = 0;
-            int timeOffsetMiliseconds = 0;
-
             short previousFrameSize = 0;
 
             foreach (var frame in framesToWrite)
@@ -860,21 +853,19 @@
                 writer.Write(new long());
                 writer.Write(new byte());
 
+                int timeStampToWrite;
                 //if it's first frame then write file creation time = earliest time from all the frames
                 if (frameOffset == framesSetStartByteOffset)
-                    writer.Write((int)firstFrameTime.ToUnixTimeSeconds());
+                {
+                    timeStampToWrite = (int) firstFrameTime.ToUnixTimeSeconds();     
+                }
                 else
                 {
-                    //increase offset value
-                    if (lastFrameIndex != frame.FrameIndex)
-                    {
-                        lastFrameIndex = frame.FrameIndex;
-                        //add 150ms for the frame time offset
-                        timeOffsetMiliseconds += 150;
-                    }
-                    //write time offset
-                    writer.Write(timeOffsetMiliseconds);
+                    timeStampToWrite = (int)(firstFrameTime - frame.DateTimeOffset).TotalMilliseconds;
                 }
+
+                //write time offset
+                writer.Write(timeStampToWrite);
 
                 writer.Write((float)frame.Depth.GetFoots());
 
@@ -907,7 +898,7 @@
                 writer.Write(new short());
 
                 //write time offset
-                writer.Write(timeOffsetMiliseconds);
+                writer.Write(timeStampToWrite);
 
                 //write Sounded Data
                 writer.Write(frame.SoundedData.Data);
@@ -1385,6 +1376,9 @@
 
         public int CompareTo(Frame otherFrame)
         {
+            if (DateTimeOffset > otherFrame.DateTimeOffset) return 1;
+            if (DateTimeOffset < otherFrame.DateTimeOffset) return -1;
+
             if (FrameIndex > otherFrame.FrameIndex) return 1;
             if (FrameIndex < otherFrame.FrameIndex) return -1;
 
