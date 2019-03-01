@@ -22,7 +22,7 @@
                  HelpText = "Input file name to be processed.")]
             public string InputFile { get; set; }
 
-            [Option('s', "search", Required = false, DefaultValue = -1,
+            [Option('s', "search", Required = false, Default = -1,
                  HelpText = "Enables research mode. Research value at specified byte offset inside frame will be printed to console.")]
             public int SearchOffset { get; set; }
 
@@ -30,31 +30,31 @@
                 HelpText = "Input filename for depth adjust")]
             public string DepthAdjustFile { get; set; }
 
-            [OptionList('o', "output", Separator = ':',
+            [Option('o', "output", Separator = ':',
                  HelpText = "Enable conversion mode. Output file version. sl2:sl3:csv")]
             public IList<string> OutputFileVersion { get; set; }
 
-            [OptionList('c', "channel", Separator = ':', Required = false,
+            [Option('c', "channel", Separator = ':', Required = false,
                  HelpText = "Channels, included in output file. Format: channel numbers, separated by colon. By default: all channels. Primary = 0, Secondary = 1, DownScan = 2, SidescanLeft = 3, SidescanRight = 4, SidescanComposite = 5, ThreeD = 9")]
             public IList<string> Channels { get; set; }
 
-            [Option('f', "from", DefaultValue = uint.MinValue,
-                 HelpText = "Get frames From specifieg number")]
+            [Option('f', "from", Default = 0,
+                 HelpText = "Get frames From specified number")]
             public uint FramesFrom { get; set; }
 
-            [Option('t', "to", DefaultValue = uint.MaxValue,
-                 HelpText = "Get frames To specifieg number")]
+            [Option('t', "to", Default = int.MaxValue,
+                 HelpText = "Get frames To specified number")]
             public uint FramesTo { get; set; }
 
-            [Option('a', "anonymous", Required = false, DefaultValue = false,
+            [Option('a', "anonymous", Required = false, Default = false,
                  HelpText = "Makes output file GPS coordinates anonymous. Sets Latitude and Longitude to zero.")]
             public bool CoordinatesDelete { get; set; }
 
-            [Option('l', "flip", Required = false, DefaultValue = false,
+            [Option('l', "flip", Required = false, Default = false,
                 HelpText = "Flip SoundedData for SidescanComposite channel.")]
             public bool FlipSoundedData { get; set; }
 
-            [Option('v', "verbose", DefaultValue = true,
+            [Option('v', "verbose", Default = true,
                  HelpText = "Prints all messages to standard output.")]
             public bool Verbose { get; set; }
 
@@ -62,11 +62,11 @@
                  HelpText = "Depth value for adding or subtraction to the depth values in the log.")]
             public string DepthShift { get; set; }
 
-            [Option('p', "speed", Required = false, DefaultValue = 1.5f,
+            [Option('p', "speed", Required = false, Default = 1.5f,
                 HelpText = "Absolute value of speed in meters/second, which will be set to SOG frames variable")]
             public float NewSpeed { get; set; }
 
-            [OptionList('g', "generate", Separator = ':', Required = false,
+            [Option('g', "generate", Separator = ':', Required = false,
                  HelpText = "Generate frames for specific channel from the frames at other channel(s). Format: numbers and chars, " +
                             "separated by colon. " +
                             "Options: numbers - destination frame channel and source channel(s); " +
@@ -82,25 +82,29 @@
                             "channel if they are not already exist.")]
             public IList<string> GenegateParams { get; set; }
 
-            [HelpOption]
-            public string GetUsage()
+            [Usage(ApplicationAlias = "\"ConsoleLogConverter.exe\" or \"dotnet ConsoleLogConverter.Core.dll\"")]
+            public static IEnumerable<Example> Examples
             {
-                var text = HelpText.AutoBuild(this, current => HelpText.DefaultParsingErrorsHandler(this, current));
-                text.AddPostOptionsLine("EXAMPLES:\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl3 -s 30 -t 10 -c 0:2\"\n");
-                text.AddPostOptionsLine("Command takes all frames from input.sl3. At the next step it takes frames from channels 0 and 2 with frame index from 0 to 10. " +
-                                        "An finally it takes four bytes at 30 offset from each frame start and represent them as different types of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).\n\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -f 10 -t 509 -c 0 -a -o sl2:csv\"\n");
-                text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it takes frames from channel 0 with frame index from 10 to 509 and delete GPS coordinates from it . And finally it save frames to two files with \"sl2\" and \"csv\" format.\n\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i BaseDepthPoints.sl2 -d pointsForAdjust.sl2 -o csv\"\n");
-                text.AddPostOptionsLine("Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between em. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"csv\" format.\n\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -h m1.15 -o csv\"\n");
-                text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substrate and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and save frames to \"csv\" format.\n\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -g 0:5:f -o sl2\"\n");
-                text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it generate all(\"f\" option) the frames at 0th(Primary) channel from 5th(SidescanComposite) channel and finally save frames from all input file channels to \"sl2\" format.\n\n");
-                text.AddPostOptionsLine("\"ConsoleLogConverter.exe -i input.sl2 -l -o sl2\"\n");
-                text.AddPostOptionsLine("Command takes all frames from input.sl2. At the next step it flip sounded data in frames at 5th(SidescanComposite) channel and finally save frames  to \"sl2\" format.\n\n");
-                return text;
+                get
+                {
+                    yield return new Example($"Log file format conversion example.{Environment.NewLine} Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substract and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and finally saves frames to \"csv\" format",
+                        new Options { InputFile = "input.sl2", FramesFrom = 10, FramesTo = 509, Channels = new List<string>() { "0" }, CoordinatesDelete = true, OutputFileVersion = new List<string>() { "sl2", "csv" } });
+
+                    yield return new Example($"Manual depth shift example.{Environment.NewLine} Command takes all frames from input.sl2. At the next step it subtract (use \"m\"(minus) prefix to substract and \"p\"(plus) to add value) 1.15 meters from depth value at each frame and finally saves frames to \"csv\" format",
+                        new Options { InputFile = "input.sl2", DepthShift = "m1.15", OutputFileVersion = new List<string>() { "csv" } });
+
+                    yield return new Example($"Depth adjust example.{Environment.NewLine} There are situations where the depth in one log is necessary to adjust to the depth in another log. Command takes all frames from BaseDepthPoints.sl2 and pointsForAdjust.sl2 files. At the next step it finds nearest points at two sequences and calculate depth difference between them. After that it add difference to each pointsForAdjust.sl2 frame. Finally it contact two sequences and save frames to file with \"csv\"",
+                        new Options { InputFile = "BaseDepthPoints.sl2", DepthAdjustFile = "pointsForAdjust.sl2", OutputFileVersion = new List<string>() { "csv" } });
+
+                    yield return new Example($"Channel generation example.{Environment.NewLine} There are situations where you have valid data at one channel and corrupt data at another. You can generate frames for specific(corrupted) channel from the frames at other(valid) channel(s). Command takes all frames from 2th(DownScan) and 5th (SidescanComposite) channels from input.sl2 and group them by unique coordinates. After that it generate 1th(Secondary) channel frames (even if frames with such coordinates from 2th and 5th chanel are in 1th(\"f\" option)). f - if specified generate frame in destination channel even if frame with such coordinates already exist; d - if specified generate sounded data from source frame depth value,(otherwise take sounded data from source frame)",
+                        new Options { InputFile = "input.sl2", GenegateParams = new List<string>() { "1", "2", "5", "f" }, OutputFileVersion = new List<string>() { "sl2" } });
+
+                    yield return new Example($"Flip Sidescan view example.{Environment.NewLine} If you have confused with position of the transducer and fixed the back to the front, then you have got the reversed sidescan images. You can fix it and flip it back. Command takes all frames from input.sl2. At the next step it flip sounded data in frames at 5th(SidescanComposite) channel and finally save frames to \"sl2\" format.",
+                        new Options { InputFile = "input.sl2", FlipSoundedData = true, OutputFileVersion = new List<string>() { "sl2" } });
+
+                    yield return new Example($"{Environment.NewLine}Research command example.{Environment.NewLine}SL binary formats are closed, and there is for all values no public schema. So, you can help to project and make some research by yourself.Command takes all frames from input.sl3. At the next step it takes frames from channels 0 and 2 with frame index from 0 to 10. And finally it takes four bytes at 30 offset from each frame start and represent them as differet types of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).",
+                        new Options { InputFile = "input.sl3", SearchOffset = 30, FramesTo = 10, Channels = new List<string> { "0", "2" } });
+                }
             }
 
         }
@@ -194,9 +198,10 @@
 
         static void Main(string[] args)
         {
-            var options = new Options();
-            if (Parser.Default.ParseArguments(args, options))
+            var parserResult = Parser.Default.ParseArguments<Options>(args);
+            if (parserResult.Tag == ParserResultType.Parsed)
             {
+                var options = ((Parsed<Options>)parserResult).Value;
                 //enlarge console window width
                 Console.WindowWidth = 120;
 
@@ -211,6 +216,14 @@
 
                 //Read Files
                 var data = ReadFile(options.InputFile, options.Verbose);
+
+                if (data == null)
+                {
+                    Console.WriteLine("Can't read frames from file");
+                    Console.WriteLine($"{Environment.NewLine}Please press any key to exit...");
+                    Console.ReadKey(true);
+                    return;
+                }
 
                 #region Depth Adjust
 
