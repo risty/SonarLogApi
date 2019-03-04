@@ -675,7 +675,6 @@
                 writer.Write(new long());
                 writer.Write(new int());
 
-                //if it's first frame then write file creation time = earliest time from all the frames
                 int timeStampToWrite;
                 //if it's first frame then write file creation time = earliest time from all the frames
                 if (frameOffset == framesSetStartByteOffset)
@@ -684,7 +683,7 @@
                 }
                 else
                 {
-                    timeStampToWrite = (int)(firstFrameTime - frame.DateTimeOffset).TotalMilliseconds;
+                    timeStampToWrite = (int)(frame.DateTimeOffset - firstFrameTime).TotalMilliseconds;
                 }
 
                 //write time offset
@@ -861,7 +860,7 @@
                 }
                 else
                 {
-                    timeStampToWrite = (int)(firstFrameTime - frame.DateTimeOffset).TotalMilliseconds;
+                    timeStampToWrite = (int)(frame.DateTimeOffset - firstFrameTime).TotalMilliseconds;
                 }
 
                 //write time offset
