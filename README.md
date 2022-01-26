@@ -42,10 +42,3 @@ And finally it takes four bytes at 30 offset from each frame start and represent
 of value(string, single bytes, short from first two bytes, short from second two bytes, integer, float).
 
 Also you can combine command examples.
-
-### Donate:
-
-#### BTC:1NodB8A9fgdLTpx9k6mK1JYscFw5PvHCcR
-#### ETH:993C9eC8aF0800a6Be2A0459cABdc19e6B852A49
-#### ZEC:t1c1sraePE5PvBGPm8DNmF13cedh3BGsj1C
-#### ZEN:znbL6teKJrALBBCmnNKnLS7rFBD527FjjKD
